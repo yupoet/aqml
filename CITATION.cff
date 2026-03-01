@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use AQML in your research, please cite it as below."
+title: "AQML: Aurum Quant Markup Language"
+version: 1.0.0-draft
+date-released: "2026-03-01"
+url: "https://github.com/yupoet/aqml"
+repository-code: "https://github.com/yupoet/aqml"
+license: Apache-2.0
+type: software
+authors:
+  - family-names: Yu
+    given-names: Paris
+    email: paris@aurumq.ai
+keywords:
+  - quantitative trading
+  - strategy specification
+  - YAML
+  - declarative programming
+  - AI-native
+  - A-shares
+abstract: >
+  AQML (Aurum Quant Markup Language) is a YAML-based declarative
+  specification for defining quantitative trading strategies. Designed
+  to be human-readable, machine-parseable, and AI-generatable, AQML
+  enables zero-code strategy definition with support for 5+ rule types,
+  17+ technical indicators, portfolio management, and risk controls.

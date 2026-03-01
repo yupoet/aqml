@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0D78C"/>
+      <stop offset="50%" style="stop-color:#D4A853"/>
+      <stop offset="100%" style="stop-color:#A68638"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="24" fill="#0A0B0D"/>
+  <text x="60" y="52" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="800" fill="url(#gold)">
+    AQML
+  </text>
+  <text x="60" y="76" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.5" font-weight="600" fill="#8A8D93" letter-spacing="2.5">
+    AURUM QUANT
+  </text>
+  <text x="60" y="90" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.5" font-weight="600" fill="#8A8D93" letter-spacing="2.5">
+    MARKUP LANG
+  </text>
+  <line x1="30" y1="58" x2="90" y2="58" stroke="#D4A853" stroke-width="0.5" opacity="0.4"/>
+</svg>

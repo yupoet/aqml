@@ -1,0 +1,75 @@
+# ══════════════════════════════════════════════════════════════
+# AQML Example: Dual Thrust Breakout
+# 经典 Dual Thrust 区间突破策略 — 价格突破布林上轨 + 成交量放大
+# Difficulty: ⭐⭐ Intermediate
+# ══════════════════════════════════════════════════════════════
+
+aqml: "1.0"
+
+name: Dual Thrust Breakout
+description: >
+  A range breakout strategy inspired by the classic Dual Thrust system.
+  Enters when price breaks above the upper Bollinger Band with volume
+  confirmation and ATR volatility expansion, signaling a potential
+  trend initiation.
+version: "1.0.0"
+
+metadata:
+  author: AQML Examples
+  created_at: "2026-03-01"
+  tags: [breakout, trend, volatility]
+  category: breakout
+  source: "Adapted from classic Dual Thrust"
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+  filters:
+    - type: compare
+      field: total_mv
+      operator: ">"
+      value: 3000000000
+
+rules:
+  # Price breaks above upper Bollinger Band
+  - type: breakout
+    name: Bollinger Upper Breakout
+    field: close
+    reference: boll_upper
+    direction: above
+    confirmation_bars: 1
+    weight: 40
+
+  # Volume surge confirms breakout
+  - type: compare
+    name: Volume Surge
+    field: volume
+    operator: ">"
+    reference: volume_ma10
+    multiplier: 2.0
+    weight: 35
+
+  # RSI not yet overbought (room to run)
+  - type: range
+    name: RSI Has Room
+    field: rsi14
+    min: 45
+    max: 75
+    weight: 25
+
+scoring:
+  mode: weighted
+  min_score: 65
+
+exit_rules:
+  stop_loss: 0.06
+  trailing_stop: 0.10
+  max_holding_days: 15
+
+portfolio:
+  method: equal_weight
+  max_positions: 8
+
+risk:
+  max_drawdown: 0.12
+  max_single_position: 0.12

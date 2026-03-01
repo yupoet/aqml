@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aqml.dev/schema/v1.0/aqml.json",
+  "title": "AQML Strategy",
+  "description": "Aurum Quant Markup Language v1.0 — Declarative quantitative strategy specification",
+  "type": "object",
+  "required": ["aqml", "name", "rules"],
+  "properties": {
+    "aqml": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "AQML specification version"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Strategy name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable strategy description"
+    },
+    "version": {
+      "type": "string",
+      "description": "User-defined strategy version"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "author": { "type": "string" },
+        "created_at": { "type": "string", "format": "date" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "category": {
+          "type": "string",
+          "enum": ["momentum", "value", "mean-reversion", "breakout", "fundamental", "composite", "custom"]
+        },
+        "source": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "universe": {
+      "type": "object",
+      "properties": {
+        "market": {
+          "type": "string",
+          "enum": ["A-shares", "A-shares-main", "custom"],
+          "default": "A-shares"
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["ST", "STAR", "BSE", "ChiNext", "new_listing"]
+          }
+        },
+        "filters": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/rule" }
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/rule" },
+      "description": "Entry conditions — at least one rule required"
+    },
+    "scoring": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["weighted", "equal", "threshold"],
+          "default": "weighted"
+        },
+        "min_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 60
+        }
+      }
+    },
+    "exit_rules": {
+      "type": "object",
+      "properties": {
+        "stop_loss": { "type": "number", "minimum": 0, "maximum": 1 },
+        "take_profit": { "type": "number", "minimum": 0 },
+        "trailing_stop": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_holding_days": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "portfolio": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["equal_weight", "score_weighted", "market_cap_weighted", "kelly", "risk_parity"]
+        },
+        "max_positions": { "type": "integer", "minimum": 1 },
+        "max_sector_pct": { "type": "number", "minimum": 0, "maximum": 1 },
+        "rebalance": {
+          "type": "string",
+          "enum": ["daily", "weekly", "biweekly", "monthly"]
+        }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "properties": {
+        "max_drawdown": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_single_position": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_sector_concentration": { "type": "number", "minimum": 0, "maximum": 1 },
+        "var_limit": { "type": "number", "minimum": 0, "maximum": 1 },
+        "correlation_threshold": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  },
+  "definitions": {
+    "rule": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["compare", "range", "signal", "pattern", "breakout"]
+        },
+        "weight": { "type": "number", "minimum": 0, "maximum": 100 },
+        "name": { "type": "string" },
+        "enabled": { "type": "boolean", "default": true },
+        "field": { "type": "string" },
+        "operator": { "type": "string", "enum": [">", ">=", "<", "<=", "==", "!="] },
+        "value": { "type": "number" },
+        "reference": { "type": "string" },
+        "multiplier": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "inclusive": { "type": "boolean", "default": true },
+        "indicator": { "type": "string" },
+        "signal": { "type": "string" },
+        "pattern": { "type": "string" },
+        "direction": { "type": "string", "enum": ["above", "below"] },
+        "lookback": { "type": "integer", "minimum": 1 },
+        "confirmation_bars": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

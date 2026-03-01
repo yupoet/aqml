@@ -1,0 +1,153 @@
+{
+  "AQML Strategy Skeleton": {
+    "prefix": "aqml",
+    "description": "Complete AQML strategy scaffold",
+    "body": [
+      "aqml: \"1.0\"",
+      "",
+      "name: ${1:Strategy Name}",
+      "description: \"${2:Brief description}\"",
+      "version: \"1.0.0\"",
+      "",
+      "metadata:",
+      "  author: ${3:Author}",
+      "  created_at: \"${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}\"",
+      "  tags: [${4:momentum}]",
+      "  category: ${5|momentum,value,mean-reversion,breakout,fundamental,composite|}",
+      "",
+      "universe:",
+      "  market: A-shares",
+      "  exclude: [ST, STAR, BSE]",
+      "",
+      "rules:",
+      "  - type: ${6|compare,range,signal,pattern,breakout|}",
+      "    field: ${7:rsi14}",
+      "    operator: \"${8|<,<=,>,>=,==,!=|}\"",
+      "    value: ${9:30}",
+      "",
+      "exit_rules:",
+      "  stop_loss: ${10:0.05}",
+      "  take_profit: ${11:0.15}",
+      "  max_holding_days: ${12:20}",
+      "",
+      "portfolio:",
+      "  method: ${13|equal_weight,score_weighted,kelly,risk_parity|}",
+      "  max_positions: ${14:10}",
+      "$0"
+    ]
+  },
+  "Compare Rule": {
+    "prefix": "rule-compare",
+    "description": "AQML compare rule",
+    "body": [
+      "- type: compare",
+      "  name: ${1:Rule Name}",
+      "  field: ${2:rsi14}",
+      "  operator: \"${3|<,<=,>,>=,==,!=|}\"",
+      "  value: ${4:30}",
+      "  weight: ${5:30}"
+    ]
+  },
+  "Compare Reference Rule": {
+    "prefix": "rule-compare-ref",
+    "description": "AQML compare rule against another field",
+    "body": [
+      "- type: compare",
+      "  name: ${1:Rule Name}",
+      "  field: ${2:close}",
+      "  operator: \"${3|>,>=,<,<=|}\"",
+      "  reference: ${4:ma20}",
+      "  multiplier: ${5:1.0}",
+      "  weight: ${6:30}"
+    ]
+  },
+  "Range Rule": {
+    "prefix": "rule-range",
+    "description": "AQML range rule",
+    "body": [
+      "- type: range",
+      "  name: ${1:Rule Name}",
+      "  field: ${2:pe_ttm}",
+      "  min: ${3:5}",
+      "  max: ${4:25}",
+      "  weight: ${5:25}"
+    ]
+  },
+  "Signal Rule": {
+    "prefix": "rule-signal",
+    "description": "AQML signal detection rule",
+    "body": [
+      "- type: signal",
+      "  name: ${1:Rule Name}",
+      "  indicator: ${2|macd,kdj,ma,boll|}",
+      "  signal: ${3|golden_cross,death_cross,overbought,oversold|}",
+      "  lookback: ${4:3}",
+      "  weight: ${5:35}"
+    ]
+  },
+  "Pattern Rule": {
+    "prefix": "rule-pattern",
+    "description": "AQML candlestick pattern rule",
+    "body": [
+      "- type: pattern",
+      "  name: ${1:Rule Name}",
+      "  pattern: ${2|hammer,engulfing_bull,engulfing_bear,doji,morning_star|}",
+      "  lookback: ${3:5}",
+      "  weight: ${4:20}"
+    ]
+  },
+  "Breakout Rule": {
+    "prefix": "rule-breakout",
+    "description": "AQML breakout detection rule",
+    "body": [
+      "- type: breakout",
+      "  name: ${1:Rule Name}",
+      "  field: ${2:close}",
+      "  reference: ${3:boll_upper}",
+      "  direction: ${4|above,below|}",
+      "  confirmation_bars: ${5:1}",
+      "  weight: ${6:30}"
+    ]
+  },
+  "Scoring Block": {
+    "prefix": "scoring",
+    "description": "AQML scoring configuration",
+    "body": [
+      "scoring:",
+      "  mode: ${1|weighted,equal,threshold|}",
+      "  min_score: ${2:60}"
+    ]
+  },
+  "Exit Rules Block": {
+    "prefix": "exit",
+    "description": "AQML exit rules",
+    "body": [
+      "exit_rules:",
+      "  stop_loss: ${1:0.05}",
+      "  take_profit: ${2:0.15}",
+      "  trailing_stop: ${3:0.08}",
+      "  max_holding_days: ${4:20}"
+    ]
+  },
+  "Portfolio Block": {
+    "prefix": "portfolio",
+    "description": "AQML portfolio configuration",
+    "body": [
+      "portfolio:",
+      "  method: ${1|equal_weight,score_weighted,market_cap_weighted,kelly,risk_parity|}",
+      "  max_positions: ${2:10}",
+      "  max_sector_pct: ${3:0.30}",
+      "  rebalance: ${4|daily,weekly,biweekly,monthly|}"
+    ]
+  },
+  "Risk Block": {
+    "prefix": "risk",
+    "description": "AQML risk management parameters",
+    "body": [
+      "risk:",
+      "  max_drawdown: ${1:0.15}",
+      "  max_single_position: ${2:0.10}",
+      "  max_sector_concentration: ${3:0.30}"
+    ]
+  }
+}

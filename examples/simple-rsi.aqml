@@ -1,0 +1,28 @@
+# ══════════════════════════════════════════════════════════════
+# AQML Example: Simple RSI Oversold Screen
+# 最简单的 AQML 策略 — 仅用 RSI 一个条件筛选超卖股票
+# Difficulty: ⭐ Beginner
+# ══════════════════════════════════════════════════════════════
+
+aqml: "1.0"
+
+name: Simple RSI Screen
+description: >
+  The simplest possible AQML strategy — screens for stocks
+  with RSI(14) below 30, indicating potential oversold conditions.
+  A good starting point for learning AQML syntax.
+
+metadata:
+  author: AQML Examples
+  tags: [beginner, rsi, oversold]
+  category: momentum
+
+universe:
+  market: A-shares
+  exclude: [ST]
+
+rules:
+  - type: compare
+    field: rsi14
+    operator: "<"
+    value: 30

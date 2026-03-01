@@ -1,0 +1,58 @@
+{
+  "name": "aqml",
+  "displayName": "AQML — Aurum Quant Markup Language",
+  "description": "Syntax highlighting, validation, and snippets for AQML quantitative strategy files",
+  "version": "0.1.0",
+  "publisher": "aurumq",
+  "license": "Apache-2.0",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yupoet/aqml"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Formatters"
+  ],
+  "keywords": [
+    "aqml",
+    "quant",
+    "quantitative",
+    "trading",
+    "strategy",
+    "yaml",
+    "A-shares",
+    "finance"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "aqml",
+        "aliases": ["AQML", "Aurum Quant Markup Language"],
+        "extensions": [".aqml"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "icon.png",
+          "dark": "icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "aqml",
+        "scopeName": "source.aqml",
+        "path": "./syntaxes/aqml.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "aqml",
+        "path": "./snippets/aqml.json"
+      }
+    ]
+  }
+}

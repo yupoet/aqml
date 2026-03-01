@@ -1,0 +1,11 @@
+# ── AQML Language Recognition ──────────────────────────────
+# Tells GitHub Linguist to treat .aqml files as YAML-derivative
+# with syntax highlighting. Until AQML is added to Linguist's
+# languages.yml, this ensures proper display on GitHub.
+
+*.aqml linguist-language=YAML
+*.aqml linguist-detectable=true
+
+# ── Standard ──────────────────────────────────────────────
+*.md linguist-documentation
+LICENSE linguist-documentation

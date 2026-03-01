@@ -1,0 +1,110 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "AQML",
+  "scopeName": "source.aqml",
+  "fileTypes": ["aqml"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#aqml-version" },
+    { "include": "#top-level-keys" },
+    { "include": "#rule-types" },
+    { "include": "#operators" },
+    { "include": "#indicators" },
+    { "include": "#signals" },
+    { "include": "#patterns-candle" },
+    { "include": "#scoring-modes" },
+    { "include": "#portfolio-methods" },
+    { "include": "#universe-labels" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#booleans" },
+    { "include": "#yaml-keys" },
+    { "include": "#yaml-punctuation" }
+  ],
+  "repository": {
+    "comments": {
+      "match": "(#.*)$",
+      "name": "comment.line.number-sign.aqml"
+    },
+    "aqml-version": {
+      "match": "^(aqml):\\s*[\"']?(\\d+\\.\\d+)[\"']?",
+      "captures": {
+        "1": { "name": "keyword.control.aqml.version" },
+        "2": { "name": "constant.numeric.version.aqml" }
+      }
+    },
+    "top-level-keys": {
+      "match": "^(name|description|version|metadata|universe|rules|scoring|exit_rules|portfolio|risk):",
+      "captures": {
+        "1": { "name": "keyword.control.aqml.section" }
+      }
+    },
+    "rule-types": {
+      "match": "\\b(compare|range|signal|pattern|breakout)\\b",
+      "name": "entity.name.type.rule.aqml"
+    },
+    "operators": {
+      "match": "[\"'](>=?|<=?|==|!=)[\"']",
+      "name": "keyword.operator.comparison.aqml"
+    },
+    "indicators": {
+      "match": "\\b(ma\\d+|ema\\d+|macd_dif|macd_dea|macd_hist|macd|rsi\\d+|rsi|kdj_k|kdj_d|kdj_j|kdj|boll_upper|boll_mid|boll_lower|boll|atr\\d*|cci\\d*|obv|dmi_plus|dmi_minus|dmi_adx|dmi|sar|supertrend|mfi\\d*|wr\\d*|volume_ma\\d+|close|open|high|low|volume|pe_ttm|pb|roe|total_mv)\\b",
+      "name": "variable.other.indicator.aqml"
+    },
+    "signals": {
+      "match": "\\b(golden_cross|death_cross|zero_cross_up|zero_cross_down|overbought|oversold|long_arrangement|short_arrangement|squeeze|expansion|upper_touch|lower_touch)\\b",
+      "name": "constant.language.signal.aqml"
+    },
+    "patterns-candle": {
+      "match": "\\b(hammer|engulfing_bull|engulfing_bear|doji|morning_star|evening_star|three_white_soldiers|three_black_crows)\\b",
+      "name": "constant.language.pattern.aqml"
+    },
+    "scoring-modes": {
+      "match": "\\b(weighted|equal|threshold)\\b",
+      "name": "support.constant.scoring.aqml"
+    },
+    "portfolio-methods": {
+      "match": "\\b(equal_weight|score_weighted|market_cap_weighted|kelly|risk_parity)\\b",
+      "name": "support.constant.portfolio.aqml"
+    },
+    "universe-labels": {
+      "match": "\\b(A-shares|A-shares-main|custom|ST|STAR|BSE|ChiNext|new_listing)\\b",
+      "name": "constant.language.universe.aqml"
+    },
+    "strings": {
+      "patterns": [
+        {
+          "match": "\"[^\"]*\"",
+          "name": "string.quoted.double.aqml"
+        },
+        {
+          "match": "'[^']*'",
+          "name": "string.quoted.single.aqml"
+        },
+        {
+          "begin": ">-?\\s*$",
+          "end": "^(?=\\S)",
+          "name": "string.unquoted.block.aqml"
+        }
+      ]
+    },
+    "numbers": {
+      "match": "\\b\\d+(\\.\\d+)?\\b",
+      "name": "constant.numeric.aqml"
+    },
+    "booleans": {
+      "match": "\\b(true|false)\\b",
+      "name": "constant.language.boolean.aqml"
+    },
+    "yaml-keys": {
+      "match": "^\\s*(\\w[\\w_-]*)(?=:\\s)",
+      "captures": {
+        "1": { "name": "entity.name.tag.yaml.aqml" }
+      }
+    },
+    "yaml-punctuation": {
+      "match": "^\\s*-\\s",
+      "name": "punctuation.definition.list.aqml"
+    }
+  }
+}
