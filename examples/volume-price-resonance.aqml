@@ -1,0 +1,87 @@
+# ================================================================
+# AQML Example: Volume-Price Resonance Timing
+# 价量共振择时 — 成交量放大 + 价格突破的共振信号
+# Source: hugo2046/QuantsPlaybook (华创证券研报复现)
+# ================================================================
+
+aqml: "1.0"
+
+name: Volume-Price Resonance
+description: >
+  Derived from Huachuang Securities research on alternative volume-price
+  resonance indicators for market timing. When price breaks upward
+  simultaneously with significant volume expansion, the two dimensions
+  "resonate" to produce a higher-conviction signal. This AQML adaptation
+  screens for stocks where both price and volume confirm each other.
+  价格突破与成交量放大同时出现时形成"共振"，信号可靠性更高。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [volume, price-volume, resonance, breakout, timing]
+  category: momentum
+  source: "hugo2046/QuantsPlaybook/C-择时类/成交量的奥秘_另类价量共振指标的择时"
+  source_license: "Unlicensed"
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+  filters:
+    - type: compare
+      field: total_mv
+      operator: ">"
+      value: 3000000000
+
+rules:
+  # Price breaks above MA20 — price dimension breakout
+  - type: compare
+    name: Price Breakout
+    field: close
+    operator: ">"
+    reference: ma20
+    multiplier: 1.02
+    weight: 30
+
+  # Volume at least 2x of 20-day average — volume dimension surge
+  - type: compare
+    name: Volume Surge
+    field: volume
+    operator: ">"
+    reference: volume_ma20
+    multiplier: 2.0
+    weight: 30
+
+  # OBV trending up — accumulation
+  - type: compare
+    name: OBV Rising
+    field: obv
+    operator: ">"
+    value: 0
+    weight: 20
+
+  # MACD histogram positive — momentum confirmation
+  - type: compare
+    name: MACD Positive
+    field: macd_hist
+    operator: ">"
+    value: 0
+    weight: 20
+
+scoring:
+  mode: weighted
+  min_score: 60
+
+exit_rules:
+  stop_loss: 0.05
+  take_profit: 0.12
+  trailing_stop: 0.08
+  max_holding_days: 15
+
+portfolio:
+  method: equal_weight
+  max_positions: 10
+
+risk:
+  max_drawdown: 0.12
+  max_single_position: 0.10

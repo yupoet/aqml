@@ -28,3 +28,10 @@ package-lock.json
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Environment
+.env
+.env.*
+
+# References / local docs
+refs/

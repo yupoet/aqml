@@ -1,0 +1,81 @@
+# ================================================================
+# AQML Example: RSI Overbought/Oversold Mean Reversion
+# RSI 超买超卖均值回归 — RSI(14) 低于 30 + 基本面过滤
+# Source: je-suis-tm/quant-trading (Apache 2.0)
+# ================================================================
+
+aqml: "1.0"
+
+name: RSI Overbought-Oversold Reversal
+description: >
+  A mean-reversion strategy based on RSI(14) boundaries. When RSI drops
+  below 30, the stock is considered oversold and likely to bounce. The
+  original strategy also implements a head-and-shoulders pattern on RSI
+  for bearish signals. This AQML version focuses on the oversold entry
+  with fundamental quality filters to avoid value traps.
+  RSI 低于 30 为超卖信号，结合基本面过滤避免"价值陷阱"。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [rsi, oversold, mean-reversion, fundamental]
+  category: mean-reversion
+  source: "je-suis-tm/quant-trading/RSI Pattern Recognition backtest.py"
+  source_license: "Apache-2.0"
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE, new_listing]
+  filters:
+    - type: compare
+      field: total_mv
+      operator: ">"
+      value: 5000000000
+
+rules:
+  # RSI(14) in oversold territory
+  - type: range
+    name: RSI Oversold
+    field: rsi14
+    min: 10
+    max: 30
+    weight: 40
+
+  # KDJ also in oversold territory — multi-indicator confirmation
+  - type: range
+    name: KDJ Oversold
+    field: kdj_j
+    min: -10
+    max: 20
+    weight: 20
+
+  # Reasonable PE — not a dying business
+  - type: range
+    name: PE Filter
+    field: pe_ttm
+    min: 5
+    max: 40
+    weight: 20
+
+  # Positive ROE — quality business
+  - type: compare
+    name: Profitable Business
+    field: roe
+    operator: ">"
+    value: 5
+    weight: 20
+
+scoring:
+  mode: weighted
+  min_score: 50
+
+exit_rules:
+  stop_loss: 0.05
+  take_profit: 0.12
+  max_holding_days: 15
+
+portfolio:
+  method: equal_weight
+  max_positions: 15
+  max_sector_pct: 0.25

@@ -1,0 +1,67 @@
+# ================================================================
+# AQML Example: MACD Oscillator Crossover
+# MACD 金叉策略 — 经典双均线交叉 + 零轴确认
+# Source: je-suis-tm/quant-trading (Apache 2.0)
+# ================================================================
+
+aqml: "1.0"
+
+name: MACD Oscillator Crossover
+description: >
+  The classic MACD strategy: when the short-period moving average crosses
+  above the long-period moving average, momentum turns bullish. The
+  original uses customizable MA periods (default 12/26). This AQML
+  version uses standard MACD golden cross signals with oscillator
+  confirmation and volume filters.
+  经典 MACD 策略：短期均线上穿长期均线时做多，结合零轴和成交量确认。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [macd, golden-cross, momentum, trend]
+  category: momentum
+  source: "je-suis-tm/quant-trading/MACD Oscillator backtest.py"
+  source_license: "Apache-2.0"
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR]
+
+rules:
+  # MACD golden cross — DIF crosses above DEA
+  - type: signal
+    name: MACD Golden Cross
+    indicator: macd
+    signal: golden_cross
+    lookback: 3
+    weight: 45
+
+  # MACD histogram turning positive — momentum shift
+  - type: compare
+    name: MACD Histogram Positive
+    field: macd_hist
+    operator: ">"
+    value: 0
+    weight: 30
+
+  # Volume above average — market participation
+  - type: compare
+    name: Volume Active
+    field: volume
+    operator: ">"
+    reference: volume_ma10
+    weight: 25
+
+scoring:
+  mode: weighted
+  min_score: 60
+
+exit_rules:
+  stop_loss: 0.05
+  take_profit: 0.15
+  max_holding_days: 30
+
+portfolio:
+  method: equal_weight
+  max_positions: 10

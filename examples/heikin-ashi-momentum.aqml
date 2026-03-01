@@ -1,0 +1,81 @@
+# ================================================================
+# AQML Example: Heikin-Ashi Filtered Momentum
+# Heikin-Ashi 过滤动量策略 — 趋势确认 + 吞没形态 + 成交量
+# Source: je-suis-tm/quant-trading (Apache 2.0)
+# ================================================================
+
+aqml: "1.0"
+
+name: Heikin-Ashi Filtered Momentum
+description: >
+  Heikin-Ashi candles filter market noise for cleaner trend detection.
+  The original strategy enters long when HA candles show strong bearish
+  marubozu patterns (reversal signal) with increasing body size, then
+  exits on bullish marubozu. This AQML adaptation captures the core
+  concept: identify strong trend reversals using candlestick patterns
+  combined with MA trend confirmation and volume filters.
+  原始策略用 Heikin-Ashi 蜡烛过滤噪音，此处用标准K线形态+趋势确认替代。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [candlestick, momentum, trend, heikin-ashi]
+  category: momentum
+  source: "je-suis-tm/quant-trading/Heikin-Ashi backtest.py"
+  source_license: "Apache-2.0"
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+
+rules:
+  # Bullish engulfing pattern — trend reversal signal
+  - type: pattern
+    name: Bullish Engulfing
+    pattern: engulfing_bull
+    lookback: 5
+    weight: 35
+
+  # Price above MA20 — uptrend context
+  - type: compare
+    name: Above MA20
+    field: close
+    operator: ">"
+    reference: ma20
+    weight: 25
+
+  # MA alignment — short-term trend confirmation
+  - type: signal
+    name: MA Golden Cross
+    indicator: ma
+    signal: golden_cross
+    lookback: 5
+    weight: 25
+
+  # Volume spike on reversal
+  - type: compare
+    name: Volume Spike
+    field: volume
+    operator: ">"
+    reference: volume_ma5
+    multiplier: 1.5
+    weight: 15
+
+scoring:
+  mode: weighted
+  min_score: 55
+
+exit_rules:
+  stop_loss: 0.06
+  take_profit: 0.18
+  trailing_stop: 0.10
+  max_holding_days: 30
+
+portfolio:
+  method: score_weighted
+  max_positions: 10
+
+risk:
+  max_drawdown: 0.15
+  max_single_position: 0.10

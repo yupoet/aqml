@@ -1,0 +1,79 @@
+# ================================================================
+# AQML Example: ICU Moving Average Timing
+# ICU 均线择时 — 中泰证券"均线才是绝对收益利器"
+# Source: hugo2046/QuantsPlaybook (中泰证券研报复现)
+# ================================================================
+
+aqml: "1.0"
+
+name: ICU Moving Average Timing
+description: >
+  Based on Zhongtai Securities research on the ICU (Intelligent
+  Crossover Unified) moving average system. The core insight: simple
+  moving average crossovers, when combined with proper filters, remain
+  one of the most robust absolute-return tools. This AQML adaptation
+  uses EMA crossovers with trend and volatility confirmation.
+  中泰证券研究表明，均线交叉配合适当过滤条件仍是最稳健的绝对收益工具。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [ema, crossover, timing, trend, absolute-return]
+  category: momentum
+  source: "hugo2046/QuantsPlaybook/C-择时类/ICU均线"
+  source_license: "Unlicensed"
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+
+rules:
+  # EMA5 above EMA20 — short-term trend bullish
+  - type: compare
+    name: EMA Short Above Long
+    field: ema5
+    operator: ">"
+    reference: ema20
+    weight: 35
+
+  # Close above EMA60 — medium-term support
+  - type: compare
+    name: Above EMA60
+    field: close
+    operator: ">"
+    reference: ema60
+    weight: 25
+
+  # Supertrend bullish — trend confirmation
+  - type: compare
+    name: Supertrend Bullish
+    field: supertrend
+    operator: "<"
+    reference: close
+    weight: 25
+
+  # Volume above 5-day average
+  - type: compare
+    name: Volume Confirmation
+    field: volume
+    operator: ">"
+    reference: volume_ma5
+    weight: 15
+
+scoring:
+  mode: weighted
+  min_score: 60
+
+exit_rules:
+  stop_loss: 0.05
+  trailing_stop: 0.08
+  max_holding_days: 20
+
+portfolio:
+  method: equal_weight
+  max_positions: 10
+
+risk:
+  max_drawdown: 0.12
+  max_single_position: 0.10
