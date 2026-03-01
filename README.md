@@ -38,7 +38,7 @@ AQML eliminates the need to write Python, C++, or any programming language to de
 ## Quick Example
 
 ```yaml
-# momentum-breakout.aqml.yaml
+# momentum-breakout.aqml
 aqml: "1.0"
 
 name: Momentum Breakout Strategy
@@ -166,7 +166,7 @@ pip install aqml-validator  # coming soon
 ```python
 from aqml import validate
 
-result = validate("my-strategy.aqml.yaml")
+result = validate("my-strategy.aqml")
 if result.valid:
     print("✓ Valid AQML strategy")
 else:
@@ -205,5 +205,5 @@ Strategy files created using AQML belong to their authors.
 ---
 
 <p align="center">
-  <sub>Created by <a href="https://aurumq.ai">Paris Yu</a> · Powered by <a href="https://aurumq.ai">AurumQ</a></sub>
+  <sub>Created by <a href="mailto:paris@aurumq.ai">Paris Yu</a> · Powered by <a href="https://www.aurumq.ai">AurumQ</a></sub>
 </p>

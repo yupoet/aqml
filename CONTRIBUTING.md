@@ -6,7 +6,7 @@ Thank you for your interest in contributing to AQML (Aurum Quant Markup Language
 
 ### 📝 Strategy Examples
 Submit new strategy examples in `examples/`. Each file should:
-- Use `.aqml.yaml` extension
+- Use `.aqml` extension
 - Include `aqml: "1.0"` version field
 - Have clear `name` and `description`
 - Include comments explaining the strategy logic
@@ -41,7 +41,7 @@ Propose new features via RFC:
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/my-contribution`)
 3. Make your changes
-4. Validate any `.aqml.yaml` files against `spec/schema.json`
+4. Validate any `.aqml` files against `spec/schema.json`
 5. Commit with a clear message
 6. Open a Pull Request
 

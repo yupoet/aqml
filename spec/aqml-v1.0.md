@@ -395,4 +395,4 @@ See the [`examples/`](../examples/) directory for complete, runnable strategy fi
 
 ---
 
-*AQML is created and maintained by [Paris Yu](https://aurumq.ai). Contributions welcome.*
+*AQML is created and maintained by [Paris Yu](mailto:paris@aurumq.ai). Contributions welcome.*
