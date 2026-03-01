@@ -1,0 +1,115 @@
+# ══════════════════════════════════════════════════════════════
+# AQML Strategy: Northbound Flow Proxy
+# 北向资金择时 — 大盘蓝筹量能 + 趋势近似
+# ──────────────────────────────────────────────────────────────
+# Source: hugo2046/QuantsPlaybook/C-择时类/北向资金交易能力一定强吗
+# License: Unlicensed
+# Original: py/北向资金交易能力一定强吗.ipynb
+# Adapted by: AQML Community
+# ⚠️ APPROXIMATION: This is a simplified adaptation. The original
+#    uses actual northbound (HKEX→A-shares) net capital flow data
+#    to construct a timing indicator: (EMA_short - EMA_long) /
+#    std(flow). This version uses large-cap volume surge + trend
+#    alignment as a proxy for institutional flow behavior.
+# ══════════════════════════════════════════════════════════════
+
+aqml: "1.0"
+
+name: Northbound Flow Proxy
+description: >
+  ⚠️ Approximation of the Northbound Capital Flow timing model
+  from Huatai Securities research. The original constructs a flow
+  indicator: (EMA(flow,6) - EMA(flow,71)) / std(flow,71), with
+  buy threshold > -0.499 and sell threshold < -0.160. Uses rolling
+  10-day parameter optimization with 90-day training windows.
+  This version uses volume surge + MFI + MA alignment as proxy
+  for institutional/foreign capital inflow patterns.
+  ⚠️ 华泰证券北向资金择时模型的近似版本。原策略使用沪深港通北向资金
+  净流入数据构建 EMA 动量指标，通过滚动超参优化阈值进行择时。
+  本版本使用量能放大 + MFI + 均线趋势作为机构资金流入的代理信号。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [northbound, flow, institutional, mfi, volume, approximation]
+  category: momentum
+  source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/北向资金交易能力一定强吗"
+  original_file: "py/北向资金交易能力一定强吗.ipynb"
+  reference_paper: "《华泰证券-北向资金交易能力一定强吗》"
+  approximation: true
+  approximation_note: >
+    原策略使用北向资金实际净流入数据，构建 North_Indicator =
+    (EMA(flow,short) - EMA(flow,long)) / std(flow,long)。
+    最优参数 shortperiod=6, longperiod=71，买入阈值 -0.499，卖出
+    阈值 -0.160。每10日滚动更新参数（90日训练窗口）。
+    本版本使用 MFI > 55（资金净流入代理）+ volume > 1.3x MA20（量能
+    放大=机构参与）+ EMA20 > EMA60（趋势方向）+ 大市值筛选（北向偏好）。
+    The original uses actual HKEX northbound flow data.
+    This version uses MFI + volume surge as institutional proxy.
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+  filters:
+    # Northbound capital concentrates in large-cap blue chips
+    - type: compare
+      field: total_mv
+      operator: ">"
+      value: 10000000000
+
+rules:
+  # MFI above 55 — net money inflow proxy
+  - type: compare
+    name: Money Inflow Signal
+    field: mfi14
+    operator: ">"
+    value: 55
+    weight: 30
+    # APPROX: 原策略使用北向净流入 > 阈值
+    # Original uses northbound net flow > threshold
+    # MFI > 55 approximates positive net capital inflow
+
+  # Volume above 1.3x MA20 — institutional participation
+  - type: compare
+    name: Institutional Volume
+    field: volume
+    operator: ">"
+    reference: volume_ma20
+    multiplier: 1.3
+    weight: 25
+    # APPROX: 原策略的 EMA(flow) 动量上升
+    # Original uses EMA momentum of capital flow
+    # Volume expansion at large caps indicates institutional activity
+
+  # EMA20 above EMA60 — trend alignment
+  - type: compare
+    name: Trend Alignment
+    field: ema20
+    operator: ">"
+    reference: ema60
+    weight: 25
+    # APPROX: 原策略的 flow indicator 方向
+    # Original flow indicator direction
+    # Medium-term trend captures the market regime northbound follows
+
+  # Close above MA20 — price confirmation
+  - type: compare
+    name: Price Confirmation
+    field: close
+    operator: ">"
+    reference: ma20
+    weight: 20
+
+scoring:
+  mode: weighted
+  min_score: 60
+
+exit_rules:
+  stop_loss: 0.06
+  trailing_stop: 0.08
+  max_holding_days: 25
+
+portfolio:
+  method: equal_weight
+  max_positions: 10

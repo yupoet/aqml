@@ -1,0 +1,115 @@
+# ══════════════════════════════════════════════════════════════
+# AQML Strategy: Herding Effect Proxy
+# CCK 羊群效应 — 量价分歧度检测近似
+# ──────────────────────────────────────────────────────────────
+# Source: hugo2046/QuantsPlaybook/C-择时类/基于CCK模型的股票市场羊群效应研究
+# License: Unlicensed
+# Original: py/羊群效应.ipynb
+# Adapted by: AQML Community
+# ⚠️ APPROXIMATION: This is a simplified adaptation. The original
+#    implements the CCK (Chang, Cheng, Khorana 2000) herding model
+#    using cross-sectional dispersion of returns (CSAD) to detect
+#    herding behavior. Applies idiosyncratic volatility ratio with
+#    EMA-smoothed top/bottom group tracking. This version uses
+#    volume anomaly + RSI divergence as herding detection proxy.
+# ══════════════════════════════════════════════════════════════
+
+aqml: "1.0"
+
+name: Herding Effect Proxy
+description: >
+  ⚠️ Approximation of the CCK herding effect timing model from
+  Kaiyuan Securities research. The original uses cross-sectional
+  absolute deviation (CSAD) of returns to detect herding: when
+  CSAD decreases nonlinearly with |R_m|, herding is present. Ranks
+  stocks by idiosyncratic volatility ratio, tracks EMA(30) of
+  top-20% vs bottom-20% counts, and generates signals from their
+  log-difference. This version uses volume + RSI patterns as proxy.
+  ⚠️ 开源证券 CCK 羊群效应择时的近似版本。原策略使用横截面收益绝对
+  偏差（CSAD）检测羊群效应，追踪高/低特质波动率分组的 EMA 差值。
+  本版本使用量价背离 + RSI 极端 + 均线偏离作为羊群行为的代理。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [herding, cck, csad, contrarian, volume, approximation]
+  category: mean-reversion
+  source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/基于CCK模型的股票市场羊群效应研究"
+  original_file: "py/羊群效应.ipynb"
+  reference_paper: "Chang, Cheng, Khorana (2000) CCK Herding Model"
+  approximation: true
+  approximation_note: >
+    原策略使用 CSAD = (1/N)Σ|R_i - R_m| 检测羊群效应（CSAD 与
+    R_m² 负相关时存在羊群行为）。将股票按特质波动率比率排名五组，
+    EMA(top_count - bottom_count, 30) 作为信号。方法1：双均线交叉；
+    方法2：z-score > 1σ 买入；方法3：15日斜率 < 0 买入。
+    本版本使用 volume 异常放大（群体行为特征）+ RSI 超卖（羊群恐慌
+    后反转机会）+ 价格偏离 MA20（过度偏离=羊群过度反应）。
+    The original uses CSAD-based herding detection with ranking.
+    This version uses volume anomaly + RSI extreme as herding proxy.
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+  filters:
+    - type: compare
+      field: total_mv
+      operator: ">"
+      value: 3000000000
+
+rules:
+  # Volume surge — herding creates volume spikes
+  - type: compare
+    name: Herding Volume Spike
+    field: volume
+    operator: ">"
+    reference: volume_ma20
+    multiplier: 1.8
+    weight: 30
+    # APPROX: 原策略检测横截面收益偏差下降（群体一致行为）
+    # Original detects CSAD decrease (group consensus behavior)
+    # Volume spikes indicate herding — crowd moves together
+
+  # RSI oversold — panic herding creates contrarian opportunity
+  - type: compare
+    name: Panic Oversold
+    field: rsi14
+    operator: "<"
+    value: 35
+    weight: 30
+    # APPROX: 原策略在羊群效应信号后寻找反转
+    # Original seeks reversals after herding detection
+    # RSI < 35 after volume spike = panic selling = reversal setup
+
+  # CCI recovering from extreme — mean-reversion signal
+  - type: compare
+    name: CCI Recovery
+    field: cci14
+    operator: ">"
+    value: -150
+    weight: 20
+    # APPROX: 原策略的斜率反转信号
+    # Original uses slope reversal as signal
+    # CCI recovering from extreme confirms reversal starting
+
+  # Price above MA10 — short-term recovery underway
+  - type: compare
+    name: Recovery Confirmation
+    field: close
+    operator: ">"
+    reference: ma10
+    weight: 20
+
+scoring:
+  mode: weighted
+  min_score: 55
+
+exit_rules:
+  stop_loss: 0.06
+  take_profit: 0.12
+  max_holding_days: 15
+
+portfolio:
+  method: equal_weight
+  max_positions: 12

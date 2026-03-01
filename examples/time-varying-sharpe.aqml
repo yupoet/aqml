@@ -1,0 +1,118 @@
+# ══════════════════════════════════════════════════════════════
+# AQML Strategy: Time-Varying Sharpe
+# 时变夏普择时 — RSI + ATR 风险调整收益近似
+# ──────────────────────────────────────────────────────────────
+# Source: hugo2046/QuantsPlaybook/C-择时类/时变夏普
+# License: Unlicensed
+# Original: py/Tsharpe.ipynb
+# Adapted by: AQML Community
+# ⚠️ APPROXIMATION: This is a simplified adaptation. The original
+#    implements Whitelaw (1994/1997) time-varying Sharpe ratio
+#    model, using macro variables (M1, PE, bond yield, savings
+#    rate) to predict monthly Sharpe ratio S_t = (R-Rf)/σ via
+#    rolling regression. This version uses RSI + ATR + MA trend
+#    as risk-adjusted return proxy.
+# ══════════════════════════════════════════════════════════════
+
+aqml: "1.0"
+
+name: Time-Varying Sharpe
+description: >
+  ⚠️ Approximation of the Time-Varying Sharpe Ratio timing model
+  from Whitelaw (1994/1997), implemented in Kaiyuan Securities
+  research. The original predicts monthly Sharpe ratio using macro
+  variables: M1 growth, PE_TTM, 1Y bond yield, national savings
+  rate, via 20-50 month rolling regression. Buy when predicted
+  S > 0.48, sell when S < 0.24.
+  This version uses favorable RSI + low ATR + trend as proxy.
+  ⚠️ 开源证券时变夏普率择时的近似版本。原策略使用宏观变量（M1、PE、
+  利率、储蓄率）通过滚动回归预测月度夏普率，买入阈值 0.48，卖出 0.24。
+  本版本使用 RSI 适中 + ATR 可控 + 趋势向好作为风险调整收益的代理。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [sharpe, timing, risk-adjusted, rsi, atr, macro, approximation]
+  category: momentum
+  source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/时变夏普"
+  original_file: "py/Tsharpe.ipynb"
+  reference_paper: "Whitelaw (1994/1997) Time-Varying Sharpe Ratios"
+  approximation: true
+  approximation_note: >
+    原策略使用月度宏观变量通过滚动 OLS 回归预测夏普率：
+    S_t = (R_t - R_f) / σ_t ≈ f(M1_yoy, PE_ttm, bond_yield, savings)。
+    买入：predicted S > 0.48；卖出：< 0.24。也测试了小波滤波版本。
+    本版本使用 RSI 45-65（正收益但未过热 ≈ 高夏普区间）+ close > MA60
+    （长期趋势正向 ≈ 正超额收益）+ MACD > 0（动量确认）+ PE_TTM <
+    30（估值合理 ≈ 原策略的 PE 因子）。
+    The original uses macro-predicted monthly Sharpe ratio.
+    This version uses RSI range + trend + PE as Sharpe proxy.
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+  filters:
+    - type: compare
+      field: total_mv
+      operator: ">"
+      value: 5000000000
+
+rules:
+  # RSI in favorable range — positive return, not overheated
+  - type: range
+    name: Favorable Return Zone
+    field: rsi14
+    min: 45
+    max: 65
+    weight: 30
+    # APPROX: 原策略的高夏普率预测区间
+    # Original predicts high Sharpe ratio state
+    # RSI 45-65 captures positive momentum without overextension
+    # (high return/risk ratio zone)
+
+  # Close above MA60 — long-term positive excess return
+  - type: compare
+    name: Positive Trend
+    field: close
+    operator: ">"
+    reference: ma60
+    weight: 25
+    # APPROX: 原策略的正超额收益预测
+    # Original predicts positive excess return (R - Rf)
+    # Price above long MA indicates sustained positive returns
+
+  # MACD histogram positive — momentum confirmation
+  - type: compare
+    name: Momentum Positive
+    field: macd_hist
+    operator: ">"
+    value: 0
+    weight: 25
+    # APPROX: 原策略的 M1 增速信号
+    # Original uses M1 growth as momentum proxy
+    # MACD positive confirms current momentum direction
+
+  # PE_TTM reasonable — valuation factor proxy
+  - type: compare
+    name: Reasonable Valuation
+    field: pe_ttm
+    operator: "<"
+    value: 30
+    weight: 20
+    # APPROX: 原策略直接使用 PE_TTM 作为宏观因子之一
+    # Original uses PE_TTM as one of the macro variables
+    # PE < 30 filters out overvalued stocks
+
+scoring:
+  mode: weighted
+  min_score: 60
+
+exit_rules:
+  stop_loss: 0.06
+  trailing_stop: 0.08
+  max_holding_days: 30
+
+portfolio:
+  method: equal_weight
+  max_positions: 10

@@ -1,0 +1,107 @@
+# ══════════════════════════════════════════════════════════════
+# AQML Strategy: Momentum Factor Ranking
+# 动量因子排名策略 — 多均线趋势确认的中长期动量
+# ──────────────────────────────────────────────────────────────
+# Source: hugo2046/QuantsPlaybook/B-因子构建类/A股市场中如何构造动量因子？
+# License: Unlicensed
+# Original: notebook/A股市场中如何构造动量因子.ipynb
+# Adapted by: AQML Community
+# ⚠️ APPROXIMATION: This is a simplified adaptation. The original
+#    strategy uses Fama-French 3-factor decomposition to isolate
+#    idiosyncratic momentum from market/size/value factors.
+#    This version approximates with multi-MA trend confirmation.
+# ══════════════════════════════════════════════════════════════
+
+aqml: "1.0"
+
+name: Momentum Factor Ranking
+description: >
+  ⚠️ Approximation of the momentum factor construction model from
+  Kaiyuan Securities research. The original decomposes returns using
+  FF3 (Fama-French) model to extract idiosyncratic momentum, then
+  ranks stocks by residual momentum percentile.
+  This version uses multi-timeframe MA alignment as a momentum proxy.
+  ⚠️ 开源证券动量因子构建模型的近似版本。原策略使用 FF3 三因子模型分解
+  收益率提取特质动量；本版本使用多周期均线排列确认动量方向。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [momentum, factor, multi-timeframe, approximation]
+  category: momentum
+  source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/B-因子构建类/A股市场中如何构造动量因子？"
+  original_file: "notebook/A股市场中如何构造动量因子.ipynb"
+  reference_paper: "《20200721-开源证券-开源量化评论（3）：A股市场中如何构造动量因子？》"
+  approximation: true
+  approximation_note: >
+    原策略使用 Fama-French 三因子回归提取特质动量（残差动量），
+    按动量百分位排名选股。本版本使用 close > ma60 + close > ma120
+    + rsi14 > 50 的多均线动量确认作为近似替代。
+    The original uses FF3 residual momentum percentile ranking.
+    This version approximates with multi-MA trend alignment.
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+  filters:
+    - type: compare
+      field: total_mv
+      operator: ">"
+      value: 3000000000
+
+rules:
+  # Price above MA60 — medium-term uptrend
+  - type: compare
+    name: Above MA60
+    field: close
+    operator: ">"
+    reference: ma60
+    weight: 30
+    # APPROX: 原策略使用 FF3 残差动量排名前20%
+    # Original uses top quintile of FF3 residual momentum
+    # MA60 crossover serves as medium-term momentum proxy
+
+  # Price above MA120 — long-term uptrend confirmation
+  - type: compare
+    name: Above MA120
+    field: close
+    operator: ">"
+    reference: ma120
+    weight: 25
+    # APPROX: 原策略使用多月动量累积
+    # Original accumulates multi-month momentum
+    # MA120 captures half-year trend direction
+
+  # RSI above 50 — positive momentum regime
+  - type: compare
+    name: RSI Positive Momentum
+    field: rsi14
+    operator: ">"
+    value: 50
+    weight: 25
+    # APPROX: 原策略使用动量排名百分位
+    # Original ranks momentum percentile
+    # RSI > 50 confirms short-term positive momentum
+
+  # Volume above average — momentum participation
+  - type: compare
+    name: Volume Confirmation
+    field: volume
+    operator: ">"
+    reference: volume_ma20
+    weight: 20
+
+scoring:
+  mode: weighted
+  min_score: 60
+
+exit_rules:
+  stop_loss: 0.08
+  trailing_stop: 0.10
+  max_holding_days: 30
+
+portfolio:
+  method: score_weighted
+  max_positions: 20
+  rebalance: biweekly

@@ -1,0 +1,99 @@
+# ══════════════════════════════════════════════════════════════
+# AQML Strategy: QRS Regime Signal
+# QRS 市场状态信号 — EMA 趋势 + ADX 强度判断
+# ──────────────────────────────────────────────────────────────
+# Source: hugo2046/QuantsPlaybook/C-择时类/QRS择时信号
+# License: Unlicensed
+# Original: QRS.ipynb
+# Adapted by: AQML Community
+# ⚠️ APPROXIMATION: This is a simplified adaptation. The original
+#    QRS is a refined RSRS model using β*R² with multiple penalty
+#    variations and dynamic thresholds from 252-day rolling windows.
+#    This version uses EMA crossover + ADX trend strength.
+# ══════════════════════════════════════════════════════════════
+
+aqml: "1.0"
+
+name: QRS Regime Signal
+description: >
+  ⚠️ Approximation of the QRS (Quantitative Regime Signal) timing
+  model from CICC research. QRS refines RSRS by using β*R² with
+  multiple penalty exponents and dynamic rolling thresholds. The
+  original uses 252-day rolling mean ± std as adaptive thresholds.
+  This version uses EMA crossover + ADX as regime detection proxy.
+  ⚠️ 中金公司 QRS 择时模型的近似版本。QRS 是 RSRS 的升级版，使用
+  β*R² 配合多种惩罚指数和滚动自适应阈值；本版本使用 EMA 交叉 +
+  ADX 趋势强度作为市场状态判断的近似。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [qrs, regime, timing, ema, adx, approximation]
+  category: momentum
+  source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/QRS择时信号"
+  original_file: "QRS.ipynb"
+  reference_paper: "《20210121-中金公司-量化择时系列（1）：金融工程视角下的技术择时艺术》"
+  approximation: true
+  approximation_note: >
+    原策略使用 zscore(β)*R^n 信号配合252日滚动 mean±std 动态阈值，
+    买入阈值 0.7，卖出阈值 -0.7。本版本使用 EMA20 > EMA60 + ADX
+    > 20 + close > MA20 的趋势状态组合判断近似替代。
+    The original uses zscore(β)*R^n with 252-day adaptive thresholds.
+    This version uses EMA crossover + ADX as regime proxy.
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+
+rules:
+  # EMA20 above EMA60 — medium-term bullish regime
+  - type: compare
+    name: EMA Bullish Regime
+    field: ema20
+    operator: ">"
+    reference: ema60
+    weight: 35
+    # APPROX: 原策略使用 QRS 信号 > 0.7 (上行阈值)
+    # Original uses QRS signal > 0.7 for bullish regime
+    # EMA20 > EMA60 captures medium-term regime shift
+
+  # ADX above 20 — trending market (not range-bound)
+  - type: compare
+    name: Trending Market
+    field: dmi_adx
+    operator: ">"
+    value: 20
+    weight: 25
+    # APPROX: 原策略用 R² 权重过滤随机噪音
+    # Original uses R² weighting to filter random noise
+    # ADX > 20 distinguishes trending from noisy regimes
+
+  # Close above MA20 — price confirmation
+  - type: compare
+    name: Price Above MA20
+    field: close
+    operator: ">"
+    reference: ma20
+    weight: 25
+
+  # Supertrend bullish — additional trend confirmation
+  - type: compare
+    name: Supertrend Bullish
+    field: supertrend
+    operator: "<"
+    reference: close
+    weight: 15
+
+scoring:
+  mode: weighted
+  min_score: 60
+
+exit_rules:
+  stop_loss: 0.06
+  trailing_stop: 0.08
+  max_holding_days: 30
+
+portfolio:
+  method: equal_weight
+  max_positions: 10

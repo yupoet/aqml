@@ -1,0 +1,102 @@
+# ══════════════════════════════════════════════════════════════
+# AQML Strategy: Low-Latency Trend
+# 低延迟趋势线择时 — EMA 交叉 + MACD 动量近似
+# ──────────────────────────────────────────────────────────────
+# Source: hugo2046/QuantsPlaybook/C-择时类/低延迟趋势线与交易择时
+# License: Unlicensed
+# Original: py/低延迟趋势线与交易择时.ipynb
+# Adapted by: AQML Community
+# ⚠️ APPROXIMATION: This is a simplified adaptation. The original
+#    implements three low-lag trendlines (LLT filter, FRAMA fractal
+#    adaptive MA, HMA Hull MA) and uses trendline slope > 0 as
+#    buy signal. This version uses EMA crossover + MACD as proxy.
+# ══════════════════════════════════════════════════════════════
+
+aqml: "1.0"
+
+name: Low-Latency Trend
+description: >
+  ⚠️ Approximation of the Low-Lag Trendline timing model from
+  Guotai Junan research. The original implements LLT (Low-Lag
+  Trendline, a 2nd-order IIR filter with α=2/(d+1)), FRAMA
+  (Fractal Adaptive MA using fractal dimension D), and HMA (Hull
+  MA using double WMA differencing). Buy when trendline slope > 0.
+  This version uses fast EMA crossover + MACD momentum as proxy.
+  ⚠️ 国泰君安低延迟趋势线择时模型的近似版本。原策略实现 LLT 滤波器、
+  FRAMA 分形自适应均线、HMA 赫尔均线三种低延迟趋势线，利用趋势线斜率
+  > 0 作为买入信号。本版本使用快速 EMA 交叉 + MACD 动量作为近似。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [low-lag, trend, llt, frama, hma, ema, approximation]
+  category: momentum
+  source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/低延迟趋势线与交易择时"
+  original_file: "py/低延迟趋势线与交易择时.ipynb"
+  reference_paper: "《20190311-国泰君安-低延迟趋势线与交易择时》"
+  approximation: true
+  approximation_note: >
+    原策略使用 LLT(α=2/(d+1), d=20-90) 二阶 IIR 滤波器构建低延迟
+    趋势线，买入条件为22日滚动斜率 > 1.0。FRAMA 使用分形维数自适应
+    调节平滑系数；HMA 使用双重 WMA 差分消除延迟。
+    本版本使用 EMA5 > EMA20 交叉（低延迟趋势方向）+ MACD 柱正向（动量
+    确认）+ close > EMA10（价格确认）作为近似。
+    The original uses LLT/FRAMA/HMA low-lag filters with slope signals.
+    This version uses fast EMA crossover + MACD as trend proxy.
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+
+rules:
+  # EMA5 above EMA20 — fast trend direction (low-lag proxy)
+  - type: compare
+    name: Fast EMA Crossover
+    field: ema5
+    operator: ">"
+    reference: ema20
+    weight: 35
+    # APPROX: 原策略使用 LLT 滤波器斜率 > 0
+    # Original uses LLT filter slope > 0
+    # EMA5 > EMA20 captures fast trend shift with minimal lag
+
+  # MACD histogram positive — momentum confirmation
+  - type: compare
+    name: MACD Momentum
+    field: macd_hist
+    operator: ">"
+    value: 0
+    weight: 25
+    # APPROX: 原策略使用22日滚动斜率 > 阈值
+    # Original uses 22-day rolling slope > threshold
+    # MACD histogram direction approximates trend slope sign
+
+  # Close above EMA10 — price confirmation
+  - type: compare
+    name: Price Above Fast Trend
+    field: close
+    operator: ">"
+    reference: ema10
+    weight: 25
+
+  # ADX above 20 — trend is meaningful
+  - type: compare
+    name: Trend Strength
+    field: dmi_adx
+    operator: ">"
+    value: 20
+    weight: 15
+
+scoring:
+  mode: weighted
+  min_score: 60
+
+exit_rules:
+  stop_loss: 0.05
+  trailing_stop: 0.08
+  max_holding_days: 25
+
+portfolio:
+  method: equal_weight
+  max_positions: 10

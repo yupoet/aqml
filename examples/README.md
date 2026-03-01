@@ -35,9 +35,37 @@ This directory contains reference strategies demonstrating various AQML patterns
 | [`volume-price-resonance.aqml`](volume-price-resonance.aqml) | Momentum | ⭐⭐ Intermediate | Volume-price resonance timing (华创证券) |
 | [`icu-ma-timing.aqml`](icu-ma-timing.aqml) | Momentum | ⭐⭐ Intermediate | ICU moving average absolute return timing (中泰证券) |
 
+## ⚠️ Approximation Conversions from [hugo2046/QuantsPlaybook](https://github.com/hugo2046/QuantsPlaybook)
+
+These strategies use **simplified standard-indicator proxies** for models that originally require custom computations (regression, factor decomposition, tick data, macro data). Each file is clearly marked with `metadata.approximation: true` and bilingual approximation notes.
+
+### Factor Strategies (B-因子构建类)
+
+| File | Original Model | Proxy Indicators | Source |
+|------|---------------|-------------------|--------|
+| [`momentum-factor-ranking.aqml`](momentum-factor-ranking.aqml) | ⚠️ FF3 Momentum Factor | Multi-MA alignment + volume | 华泰证券 |
+| [`low-volatility-screen.aqml`](low-volatility-screen.aqml) | ⚠️ Idiosyncratic Volatility | Bollinger squeeze + quality | 华泰证券 |
+| [`short-term-reversal.aqml`](short-term-reversal.aqml) | ⚠️ W-Cut Microstructure | RSI6 oversold + Bollinger lower | 开源证券 |
+| [`smart-money-flow.aqml`](smart-money-flow.aqml) | ⚠️ Smart Money VWAP 2.0 | MFI + volume surge + OBV | 开源证券 |
+| [`chip-concentration.aqml`](chip-concentration.aqml) | ⚠️ Chip Distribution Factor | Bollinger squeeze + low volume | 广发证券 |
+| [`turnover-activity.aqml`](turnover-activity.aqml) | ⚠️ Amplitude Hidden Structure | Volume anomaly + CCI + ATR | 东吴证券 |
+
+### Timing Strategies (C-择时类)
+
+| File | Original Model | Proxy Indicators | Source |
+|------|---------------|-------------------|--------|
+| [`rsrs-support-resistance.aqml`](rsrs-support-resistance.aqml) | ⚠️ RSRS Regression Slope | SAR + DMI + ADX | 光大证券 |
+| [`qrs-regime-signal.aqml`](qrs-regime-signal.aqml) | ⚠️ QRS β*R² Signal | EMA crossover + ADX | 中金公司 |
+| [`low-latency-trend.aqml`](low-latency-trend.aqml) | ⚠️ LLT/FRAMA/HMA Filters | EMA5/20 crossover + MACD | 国泰君安 |
+| [`bull-bear-regime.aqml`](bull-bear-regime.aqml) | ⚠️ CSVC σ/τ Bull-Bear | MA alignment + ADX + volume | 天风证券 |
+| [`volatility-regime-timing.aqml`](volatility-regime-timing.aqml) | ⚠️ FF3 Idiosyncratic Vol | Bollinger squeeze + DMI | 国信证券 |
+| [`northbound-flow-proxy.aqml`](northbound-flow-proxy.aqml) | ⚠️ Northbound Capital Flow | MFI + volume + EMA trend | 华泰证券 |
+| [`time-varying-sharpe.aqml`](time-varying-sharpe.aqml) | ⚠️ Whitelaw Time-Varying Sharpe | RSI range + MA60 + PE | 开源证券 |
+| [`herding-effect-proxy.aqml`](herding-effect-proxy.aqml) | ⚠️ CCK Herding (CSAD) | Volume spike + RSI oversold | 开源证券 |
+
 ## Strategies Not Converted
 
-The following strategies from the reference repositories were **not converted** because they fall outside AQML v1.0 scope:
+The following strategies from the reference repositories were **not converted** because they fall outside AQML v1.0 scope even with approximation:
 
 | Strategy | Repo | Reason |
 |----------|------|--------|
@@ -47,12 +75,10 @@ The following strategies from the reference repositories were **not converted** 
 | Monte Carlo | quant-trading | Simulation / research project |
 | Oil Money | quant-trading | Macro commodity-FX research project |
 | London Breakout | quant-trading | Intraday forex-specific, time-zone dependent |
-| RSRS | QuantsPlaybook | Custom regression slope, not a standard indicator |
 | HHT Model | QuantsPlaybook | Hilbert-Huang Transform + ML classifier |
 | Wavelet Analysis | QuantsPlaybook | Signal processing (wavelet decomposition) |
 | Trader-Company | QuantsPlaybook | Meta-heuristic ensemble algorithm |
 | MLT TSMOM | QuantsPlaybook | Deep multi-task learning model |
-| Most factor strategies | QuantsPlaybook | Custom factor construction requiring raw tick/order data |
 
 ## Validating Examples
 

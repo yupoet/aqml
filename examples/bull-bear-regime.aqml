@@ -1,0 +1,110 @@
+# ══════════════════════════════════════════════════════════════
+# AQML Strategy: Bull-Bear Regime
+# CSVC 熊牛指标 — 波动率/换手率框架近似
+# ──────────────────────────────────────────────────────────────
+# Source: hugo2046/QuantsPlaybook/C-择时类/CSVC框架及熊牛指标
+# License: Unlicensed
+# Original: py/波动率和换手率构建牛熊指标.ipynb
+# Adapted by: AQML Community
+# ⚠️ APPROXIMATION: This is a simplified adaptation. The original
+#    CSVC framework uses a 250-day rolling volatility/turnover
+#    ratio as bull-bear indicator (σ/τ), creating a 2×2 market
+#    state matrix. This version uses MA alignment + ADX + volume
+#    expansion as regime detection proxy.
+# ══════════════════════════════════════════════════════════════
+
+aqml: "1.0"
+
+name: Bull-Bear Regime
+description: >
+  ⚠️ Approximation of the CSVC (Cross-Sectional Volatility and
+  Correlation) bull-bear indicator from Tianfeng Securities research.
+  The original divides market states into a 2×2 matrix by 250-day
+  rolling volatility and turnover rate; the bull-bear indicator
+  kernel = σ/τ is inversely correlated with price (r ≈ -0.55).
+  Buy when kernel crosses below its MA (inverted logic).
+  This version uses MA alignment + ADX + volume as regime proxy.
+  ⚠️ 天风证券 CSVC 框架熊牛指标的近似版本。原策略使用250日滚动波动率
+  与换手率的比值（σ/τ）构建熊牛指标，kernel 与价格负相关（r≈-0.55），
+  kernel 下穿均线买入。本版本使用均线排列 + ADX + 量能作为近似。
+version: "1.0.0"
+
+metadata:
+  author: AQML Community
+  created_at: "2026-03-01"
+  tags: [csvc, bull-bear, regime, volatility, turnover, approximation]
+  category: momentum
+  source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/CSVC框架及熊牛指标"
+  original_file: "py/波动率和换手率构建牛熊指标.ipynb"
+  reference_paper: "《天风证券-CSVC框架及熊牛指标研究》"
+  approximation: true
+  approximation_note: >
+    原策略用250日滚动窗口计算波动率(σ)和换手率(τ)的比值(kernel=σ/τ)，
+    构建2×2市场状态矩阵：(波动↑,换手↑)=牛市, (波动↑,换手↓)=熊市。
+    kernel 与价格呈负相关(-0.55)，kernel 下穿MA时买入。
+    本版本使用 MA20 > MA60（趋势方向）+ ADX > 25（趋势强度）+ volume
+    > volume_ma20（换手活跃=牛市特征）+ RSI 40-70（非超买超卖区间）。
+    The original uses σ/τ ratio with inverse correlation to price.
+    This version uses MA alignment + ADX + volume as bull proxy.
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+
+rules:
+  # MA20 above MA60 — medium-term bullish regime
+  - type: compare
+    name: Bullish MA Alignment
+    field: ma20
+    operator: ">"
+    reference: ma60
+    weight: 30
+    # APPROX: 原策略使用 kernel 下穿均线（反向指标）
+    # Original uses kernel crossing below MA (inverse indicator)
+    # MA20 > MA60 captures medium-term bullish regime directly
+
+  # ADX above 25 — strong trending environment
+  - type: compare
+    name: Strong Trend Regime
+    field: dmi_adx
+    operator: ">"
+    value: 25
+    weight: 25
+    # APPROX: 原策略的牛市状态=波动率↑ + 换手率↑
+    # Original bull state = vol↑ + turnover↑
+    # ADX > 25 confirms a strong directional trend
+
+  # Volume above MA20 — active turnover (bull characteristic)
+  - type: compare
+    name: Active Turnover
+    field: volume
+    operator: ">"
+    reference: volume_ma20
+    weight: 25
+    # APPROX: 原策略使用换手率活跃度作为牛市特征
+    # Original uses turnover activity as bull regime feature
+    # Volume expansion indicates market participation
+
+  # RSI in bullish range (not extreme)
+  - type: range
+    name: Healthy Momentum
+    field: rsi14
+    min: 40
+    max: 70
+    weight: 20
+    # APPROX: 原策略的 kernel 值处于合理区间
+    # Original kernel in reasonable range for bull regime
+    # RSI 40-70 filters out exhaustion extremes
+
+scoring:
+  mode: weighted
+  min_score: 60
+
+exit_rules:
+  stop_loss: 0.07
+  trailing_stop: 0.10
+  max_holding_days: 30
+
+portfolio:
+  method: equal_weight
+  max_positions: 10
