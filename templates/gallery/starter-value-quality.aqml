@@ -1,0 +1,69 @@
+# AQML Template: Value Quality Starter
+# Copy this file and tune:
+# - rules[0].max for valuation strictness
+# - rules[2].right for minimum ROE
+
+version: "2.0"
+name: Value Quality Starter
+description: >
+  A ranked template for value investors who still want quality and trend
+  confirmation. It combines low valuation, solid profitability, and a
+  simple moving-average filter.
+signal_type: buy
+metadata:
+  author: AQML Templates
+  template_id: starter-value-quality
+  tags: [template, starter, value, quality]
+  category: value
+
+filters:
+  min_market_cap: 50.0
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE, new_listing]
+
+rules:
+  - type: range
+    indicator: pe_ttm
+    min: 3
+    max: 18
+    comment: Reasonable PE range
+  - type: range
+    indicator: pb
+    min: 0.5
+    max: 2.5
+    comment: Reasonable PB range
+  - type: compare
+    left: roe
+    operator: ">="
+    right: 10
+    comment: Healthy profitability
+  - type: compare
+    left: close
+    operator: ">"
+    right: ma20
+    comment: Above 20-day moving average
+
+scoring:
+  max_score: 100
+  min_score: 55
+  rule_points:
+    - points: 25
+    - points: 20
+    - points: 30
+    - points: 25
+
+exit_rules:
+  stop_loss_pct: 8.0
+  take_profit_pct: 22.0
+  max_holding_days: 45
+
+portfolio:
+  method: score_weighted
+  max_positions: 15
+  max_sector_pct: 0.25
+
+risk:
+  max_drawdown: 18.0
+  max_single_position: 8.0

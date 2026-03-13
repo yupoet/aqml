@@ -1,0 +1,63 @@
+# AQML Template: RSI Oversold Starter
+# Copy this file and tune:
+# - rules[0].max for the oversold threshold
+# - exit_rules.take_profit_pct for your rebound target
+
+version: "2.0"
+name: RSI Oversold Starter
+description: >
+  A minimal starter template for oversold rebound screens. It combines
+  a simple RSI threshold with recent MACD golden-cross confirmation.
+signal_type: buy
+metadata:
+  author: AQML Templates
+  template_id: starter-rsi-oversold
+  tags: [template, starter, mean-reversion, rsi]
+  category: mean_reversion
+
+filters:
+  min_market_cap: 30.0
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+
+rules:
+  - type: range
+    indicator: rsi14
+    min: 0
+    max: 30
+    comment: RSI in oversold zone
+  - logic: or
+    comment: MACD golden cross within 2 bars
+    conditions:
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: 0
+        comment: MACD golden cross today
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: -1
+        comment: MACD golden cross yesterday
+
+scoring:
+  max_score: 100
+  min_score: 60
+  rule_points:
+    - points: 55
+    - points: 45
+
+exit_rules:
+  stop_loss_pct: 5.0
+  take_profit_pct: 12.0
+  max_holding_days: 12
+
+portfolio:
+  method: equal_weight
+  max_positions: 10
+
+risk:
+  max_drawdown: 12.0
+  max_single_position: 10.0

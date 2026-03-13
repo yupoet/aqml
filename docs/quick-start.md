@@ -172,6 +172,7 @@ PY
 ## Next Steps
 
 - Browse [examples/](../examples/) for complete v2 strategies
+- Start from a copyable template in [templates/gallery/](../templates/gallery/)
 - Read the [full specification](../spec/aqml-v2.0.md)
 - Use `aqml validate` to lint generated strategies locally
 - Try the [AurumQ platform](https://aurumq.ai) for backtesting and execution

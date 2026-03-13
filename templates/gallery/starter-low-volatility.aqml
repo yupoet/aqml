@@ -1,0 +1,82 @@
+# AQML Template: Low Volatility Starter
+# Copy this file and tune:
+# - rules[1].min and rules[1].max for the neutral RSI band
+# - filters.min_market_cap for size bias
+
+version: "2.0"
+name: Low Volatility Starter
+description: >
+  A starter template for low-volatility and squeeze-style setups. It
+  combines a recent Bollinger squeeze with a neutral RSI range, quality
+  bias, and long-trend confirmation.
+signal_type: buy
+metadata:
+  author: AQML Templates
+  template_id: starter-low-volatility
+  tags: [template, starter, low-volatility, squeeze]
+  category: low_volatility
+
+filters:
+  min_market_cap: 50.0
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE, new_listing]
+
+rules:
+  - logic: or
+    comment: Recent Bollinger squeeze
+    conditions:
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: 0
+        comment: Squeeze today
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -1
+        comment: Squeeze yesterday
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -2
+        comment: Squeeze 2 bars ago
+  - type: range
+    indicator: rsi14
+    min: 40
+    max: 60
+    comment: Neutral RSI band
+  - type: compare
+    left: roe
+    operator: ">="
+    right: 10
+    comment: Quality business
+  - type: compare
+    left: close
+    operator: ">"
+    right: ma60
+    comment: Above long-term trend
+
+scoring:
+  max_score: 100
+  min_score: 55
+  rule_points:
+    - points: 30
+    - points: 20
+    - points: 25
+    - points: 25
+
+exit_rules:
+  stop_loss_pct: 6.0
+  take_profit_pct: 18.0
+  max_holding_days: 35
+
+portfolio:
+  method: equal_weight
+  max_positions: 15
+  max_sector_pct: 0.20
+
+risk:
+  max_drawdown: 15.0
+  max_single_position: 8.0

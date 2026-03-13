@@ -199,6 +199,13 @@ strategy = parse("examples/simple-rsi.aqml")
 
 GitHub Actions now cover CI, wheel/sdist builds, and PyPI/TestPyPI release flow for the validator package. The VS Code extension is also packaged as a `.vsix` with a dedicated GitHub Actions workflow and Marketplace publish flow.
 
+### Strategy Template Gallery
+
+Ready-to-copy starter templates now live in [`templates/gallery/`](templates/gallery/). The gallery is distinct from [`examples/`](examples/):
+
+- `examples/` show the full executable profile and source conversions
+- `templates/gallery/` provides opinionated starting points with tuning hints and a machine-readable [`index.yaml`](templates/gallery/index.yaml)
+
 ## Roadmap
 
 - [x] AQML v2 executable-profile draft
@@ -207,7 +214,7 @@ GitHub Actions now cover CI, wheel/sdist builds, and PyPI/TestPyPI release flow 
 - [x] Nested logic groups, `compare_all`, and tiered scoring
 - [x] Python validator package (`aqml-validator`)
 - [x] VS Code extension packaging
-- [ ] Strategy template gallery
+- [x] Strategy template gallery
 - [ ] Multi-language validator (JavaScript, Go)
 - [ ] AQML v3.0: multi-asset strategies and custom factor expressions
 

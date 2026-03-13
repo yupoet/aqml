@@ -1,0 +1,69 @@
+# AQML Template: Trend Following Starter
+# Copy this file and tune:
+# - rules[3].right_multiplier for volume confirmation
+# - exit_rules.trailing_stop_pct for trend tolerance
+
+version: "2.0"
+name: Trend Following Starter
+description: >
+  A simple trend template built around moving-average alignment and
+  stronger-than-average volume. It is suitable for rotation and trend
+  continuation systems.
+signal_type: buy
+metadata:
+  author: AQML Templates
+  template_id: starter-trend-following
+  tags: [template, starter, trend, moving-average]
+  category: trend
+
+filters:
+  min_market_cap: 30.0
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+
+rules:
+  - type: compare
+    left: ma5
+    operator: ">"
+    right: ma10
+    comment: Fast MA above medium MA
+  - type: compare
+    left: ma10
+    operator: ">"
+    right: ma20
+    comment: Medium MA above slow MA
+  - type: compare
+    left: close
+    operator: ">"
+    right: ma60
+    comment: Price above long-term trend
+  - type: compare
+    left: volume
+    operator: ">"
+    right: volume_ma10
+    right_multiplier: 1.2
+    comment: Active volume expansion
+
+scoring:
+  max_score: 100
+  min_score: 60
+  rule_points:
+    - points: 25
+    - points: 25
+    - points: 30
+    - points: 20
+
+exit_rules:
+  stop_loss_pct: 6.0
+  trailing_stop_pct: 8.0
+  max_holding_days: 30
+
+portfolio:
+  method: equal_weight
+  max_positions: 12
+
+risk:
+  max_drawdown: 14.0
+  max_single_position: 10.0

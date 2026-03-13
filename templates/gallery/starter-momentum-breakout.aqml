@@ -1,0 +1,77 @@
+# AQML Template: Momentum Breakout Starter
+# Copy this file and tune:
+# - rules[2].right_multiplier for volume confirmation strength
+# - exit_rules.max_holding_days for trade duration
+
+version: "2.0"
+name: Momentum Breakout Starter
+description: >
+  A starter template for short-term momentum reversals. It looks for
+  oversold RSI, a recent MACD golden cross, and expanding volume.
+signal_type: buy
+metadata:
+  author: AQML Templates
+  template_id: starter-momentum-breakout
+  tags: [template, starter, momentum, breakout]
+  category: momentum
+
+filters:
+  min_market_cap: 30.0
+
+universe:
+  market: A-shares
+  exclude: [ST, STAR, BSE]
+
+rules:
+  - type: range
+    indicator: rsi14
+    min: 0
+    max: 35
+    comment: RSI below rebound zone
+  - logic: or
+    comment: MACD golden cross within 3 bars
+    conditions:
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: 0
+        comment: Golden cross today
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: -1
+        comment: Golden cross yesterday
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: -2
+        comment: Golden cross 2 bars ago
+  - type: compare
+    left: volume
+    operator: ">"
+    right: volume_ma10
+    right_multiplier: 1.5
+    comment: Volume confirmation
+
+scoring:
+  max_score: 100
+  min_score: 60
+  rule_points:
+    - points: 35
+    - points: 35
+    - points: 30
+
+exit_rules:
+  stop_loss_pct: 5.0
+  take_profit_pct: 15.0
+  trailing_stop_pct: 8.0
+  max_holding_days: 20
+
+portfolio:
+  method: score_weighted
+  max_positions: 10
+  max_sector_pct: 0.30
+
+risk:
+  max_drawdown: 15.0
+  max_single_position: 10.0

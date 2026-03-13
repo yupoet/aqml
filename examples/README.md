@@ -2,6 +2,8 @@
 
 This directory contains reference strategies demonstrating the current AQML v2 executable profile.
 
+If you want a copy-and-edit starting point rather than a reference specimen, use the template gallery in [`../templates/gallery/`](../templates/gallery/) instead.
+
 All files in this directory are synced to:
 
 - [`../spec/aqml-v2.0.md`](../spec/aqml-v2.0.md)

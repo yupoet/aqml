@@ -1,0 +1,102 @@
+version: 1
+gallery: aqml-strategy-templates
+templates:
+  - id: starter-rsi-oversold
+    file: starter-rsi-oversold.aqml
+    name: RSI Oversold Starter
+    category: mean_reversion
+    difficulty: beginner
+    signal_type: buy
+    holding_period: short_term
+    summary: Simple oversold rebound template with RSI and MACD confirmation.
+    best_for:
+      - learning AQML syntax
+      - first mean-reversion screen
+    based_on_example: simple-rsi.aqml
+    edit_points:
+      - path: rules[0].max
+        label: RSI oversold threshold
+        guidance: Lower values reduce signal count but usually increase selectivity.
+      - path: exit_rules.take_profit_pct
+        label: Take-profit target
+        guidance: Use smaller values for fast rebound trades and larger values for swing setups.
+
+  - id: starter-momentum-breakout
+    file: starter-momentum-breakout.aqml
+    name: Momentum Breakout Starter
+    category: momentum
+    difficulty: beginner
+    signal_type: buy
+    holding_period: short_term
+    summary: Oversold bounce plus MACD golden cross and volume expansion.
+    best_for:
+      - short-term reversal entries
+      - ranking candidates with simple scoring
+    based_on_example: momentum-breakout.aqml
+    edit_points:
+      - path: rules[2].right_multiplier
+        label: Volume multiplier
+        guidance: Increase it to require stronger confirmation from volume.
+      - path: exit_rules.max_holding_days
+        label: Maximum holding days
+        guidance: Keep this short when the template is used for rebound trades.
+
+  - id: starter-value-quality
+    file: starter-value-quality.aqml
+    name: Value Quality Starter
+    category: value
+    difficulty: intermediate
+    signal_type: buy
+    holding_period: medium_term
+    summary: Value plus quality plus trend confirmation with score-weighted allocation.
+    best_for:
+      - ranked stock selection
+      - longer holding periods
+    based_on_example: multi-factor-value.aqml
+    edit_points:
+      - path: rules[0].max
+        label: PE ceiling
+        guidance: Tighten for deeper value, loosen for broader coverage.
+      - path: rules[2].right
+        label: Minimum ROE
+        guidance: Raise it when you want stronger quality bias.
+
+  - id: starter-trend-following
+    file: starter-trend-following.aqml
+    name: Trend Following Starter
+    category: trend
+    difficulty: beginner
+    signal_type: buy
+    holding_period: medium_term
+    summary: MA alignment with volume confirmation for persistent uptrends.
+    best_for:
+      - simple trend-following screens
+      - timing templates for rotation systems
+    based_on_example: alligator-timing.aqml
+    edit_points:
+      - path: rules[3].right_multiplier
+        label: Volume confirmation strength
+        guidance: Lower values admit more setups, higher values focus on stronger breakouts.
+      - path: exit_rules.trailing_stop_pct
+        label: Trailing stop
+        guidance: Use tighter stops for faster rotation, wider stops for trend capture.
+
+  - id: starter-low-volatility
+    file: starter-low-volatility.aqml
+    name: Low Volatility Starter
+    category: low_volatility
+    difficulty: intermediate
+    signal_type: buy
+    holding_period: medium_term
+    summary: Squeeze-based low-volatility screen with quality and long-trend filters.
+    best_for:
+      - defensive stock selection
+      - low-volatility factor approximations
+    based_on_example: low-volatility-screen.aqml
+    edit_points:
+      - path: rules[1].min
+        label: RSI floor
+        guidance: A wider range allows more neutral setups during consolidations.
+      - path: filters.min_market_cap
+        label: Minimum market cap
+        guidance: Raise this when you want to bias toward larger, steadier names.
