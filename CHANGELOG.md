@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - JSON Schema aligned with the current AurumQ parser and evaluator
 - Documentation for nested logic groups, `compare_all`, tiered scoring, and percentage-based exits
 - Editor snippets and syntax updates for `signal_type`, `filters`, grouped logic, and v2 rule keys
+- Installable Python validator package with `aqml` CLI, normalization, and example-backed tests
+- Wheel/sdist packaging metadata, CI workflow, and GitHub Actions based release flow for `aqml-validator`
 
 ### Changed
 - Synced all examples from legacy v1-style keys to the executable v2 syntax

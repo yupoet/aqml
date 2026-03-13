@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+include NOTICE
+include pyproject.toml
+recursive-include src/aqml/data *.json
+recursive-include spec *.json *.md
+recursive-include examples *.aqml
+recursive-include validators/python *.md

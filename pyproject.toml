@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aqml-validator"
+version = "0.1.0"
+description = "Python validator and CLI for the AQML v2 executable profile"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+keywords = ["aqml", "yaml", "quant", "trading", "validator"]
+authors = [
+  { name = "AQML Contributors" }
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Text Processing :: Markup",
+  "Typing :: Typed"
+]
+dependencies = [
+  "PyYAML>=6.0",
+  "jsonschema>=4.18"
+]
+
+[project.urls]
+Homepage = "https://github.com/yupoet/aqml"
+Repository = "https://github.com/yupoet/aqml"
+Issues = "https://github.com/yupoet/aqml/issues"
+Changelog = "https://github.com/yupoet/aqml/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2",
+  "pytest>=8.0",
+  "ruff>=0.11.0",
+  "twine>=5.0"
+]
+
+[project.scripts]
+aqml = "aqml.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+aqml = ["data/schema.json", "py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

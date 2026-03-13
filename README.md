@@ -180,7 +180,24 @@ The `.aqml` extension establishes AQML as a first-class file format with dedicat
 
 ### Validator
 
-JSON Schema is provided at [`spec/schema.json`](spec/schema.json). Example strategies in [`examples/`](examples/) are synced to that schema and to the current AurumQ evaluator semantics.
+JSON Schema is provided at [`spec/schema.json`](spec/schema.json). The repository now also ships a lightweight Python validator package and CLI:
+
+```bash
+pip install -e .
+aqml validate examples/simple-rsi.aqml
+python -m build
+```
+
+Python API:
+
+```python
+from aqml import parse, validate
+
+result = validate("examples/simple-rsi.aqml")
+strategy = parse("examples/simple-rsi.aqml")
+```
+
+GitHub Actions now cover CI, wheel/sdist builds, and PyPI/TestPyPI release flow for the validator package.
 
 ## Roadmap
 
@@ -188,7 +205,7 @@ JSON Schema is provided at [`spec/schema.json`](spec/schema.json). Example strat
 - [x] JSON Schema for validation
 - [x] Example strategy library synced to the executable parser
 - [x] Nested logic groups, `compare_all`, and tiered scoring
-- [ ] Python validator package (`aqml-validator`)
+- [x] Python validator package (`aqml-validator`)
 - [ ] VS Code extension packaging
 - [ ] Strategy template gallery
 - [ ] Multi-language validator (JavaScript, Go)

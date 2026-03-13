@@ -138,7 +138,14 @@ print('✓ Valid AQML')
 "
 ```
 
-If you have AurumQ locally, also run the executable validator:
+Or use the bundled validator CLI:
+
+```bash
+pip install -e .
+aqml validate my-strategy.aqml
+```
+
+If you have AurumQ locally, you can still cross-check against the current service validator:
 
 ```bash
 .venv/bin/python - <<'PY'
@@ -155,4 +162,5 @@ PY
 
 - Browse [examples/](../examples/) for complete v2 strategies
 - Read the [full specification](../spec/aqml-v2.0.md)
+- Use `aqml validate` to lint generated strategies locally
 - Try the [AurumQ platform](https://aurumq.ai) for backtesting and execution

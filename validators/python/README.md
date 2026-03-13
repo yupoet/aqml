@@ -1,13 +1,34 @@
 # AQML Python Validator
 
-> 🚧 Coming soon — `pip install aqml-validator`
+The repository now includes a working Python package and CLI for the AQML v2 executable profile.
 
-## Planned API
+## Install Locally
+
+```bash
+pip install -e .
+```
+
+For development:
+
+```bash
+pip install -e ".[dev]"
+```
+
+## CLI
+
+```bash
+aqml validate my-strategy.aqml
+aqml normalize my-strategy.aqml --in-place
+aqml parse my-strategy.aqml
+aqml schema-path
+python -m build
+```
+
+## Python API
 
 ```python
-from aqml import validate, parse
+from aqml import normalize, parse, validate
 
-# Validate a strategy file
 result = validate("my-strategy.aqml")
 if result.valid:
     print("✓ Valid AQML strategy")
@@ -15,31 +36,30 @@ else:
     for error in result.errors:
         print(f"✗ {error.path}: {error.message}")
 
-# Parse into structured object
 strategy = parse("my-strategy.aqml")
-print(strategy.name)           # Strategy name
-print(strategy.rules)          # List of Rule objects
-print(strategy.exit_rules)     # ExitRules object
+print(strategy["name"])
+
+formatted = normalize("my-strategy.aqml")
+print(formatted)
 ```
 
-## Current Workaround
+## Validation Scope
 
-Use `jsonschema` directly:
+The validator checks:
 
-```python
-import json
-import yaml
-import jsonschema
+- YAML parsing via `yaml.safe_load`
+- JSON Schema compatibility with `spec/schema.json`
+- executable-profile semantics such as rule group depth, tier structure, exit percent ranges, and supported portfolio methods
 
-with open("spec/schema.json") as f:
-    schema = json.load(f)
+The package is intentionally dependency-light and does not require AurumQ's database or service layer.
 
-with open("my-strategy.aqml") as f:
-    strategy = yaml.safe_load(f)
+## Packaging
 
-try:
-    jsonschema.validate(strategy, schema)
-    print("✓ Valid AQML")
-except jsonschema.ValidationError as e:
-    print(f"✗ {e.message}")
+Build artifacts locally:
+
+```bash
+python -m build
+twine check dist/*
 ```
+
+Release workflow details are documented in [`RELEASING.md`](RELEASING.md).
