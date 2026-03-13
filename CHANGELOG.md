@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Editor snippets and syntax updates for `signal_type`, `filters`, grouped logic, and v2 rule keys
 - Installable Python validator package with `aqml` CLI, normalization, and example-backed tests
 - Wheel/sdist packaging metadata, CI workflow, and GitHub Actions based release flow for `aqml-validator`
+- Packaged VS Code extension with bundled AQML schema, VSIX build workflow, and Marketplace publish flow
 
 ### Changed
 - Synced all examples from legacy v1-style keys to the executable v2 syntax

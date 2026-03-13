@@ -1,14 +1,17 @@
 {
   "name": "aqml",
-  "displayName": "AQML — Aurum Quant Markup Language",
+  "displayName": "AQML",
   "description": "Syntax highlighting, validation, and snippets for AQML v2 executable-profile strategy files",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "aurumq",
   "license": "Apache-2.0",
-  "icon": "icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/yupoet/aqml"
+  },
+  "homepage": "https://github.com/yupoet/aqml/tree/main/editors/vscode",
+  "bugs": {
+    "url": "https://github.com/yupoet/aqml/issues"
   },
   "engines": {
     "vscode": "^1.75.0"
@@ -16,7 +19,7 @@
   "categories": [
     "Programming Languages",
     "Snippets",
-    "Formatters"
+    "Other"
   ],
   "keywords": [
     "aqml",
@@ -28,16 +31,39 @@
     "A-shares",
     "finance"
   ],
+  "galleryBanner": {
+    "color": "#0D223A",
+    "theme": "dark"
+  },
+  "extensionDependencies": [
+    "redhat.vscode-yaml"
+  ],
+  "scripts": {
+    "sync:schema": "node ./scripts/sync-schema.mjs",
+    "check:schema": "node ./scripts/check-schema.mjs",
+    "vscode:prepublish": "npm run sync:schema && npm run check:schema",
+    "package": "vsce package --no-dependencies --out aqml-vscode-${npm_package_version}.vsix",
+    "package:ci": "vsce package --no-dependencies",
+    "deploy": "vsce publish --no-dependencies"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.7.1"
+  },
   "contributes": {
     "languages": [
       {
         "id": "aqml",
-        "aliases": ["AQML", "Aurum Quant Markup Language"],
-        "extensions": [".aqml"],
+        "aliases": [
+          "AQML",
+          "Aurum Quant Markup Language"
+        ],
+        "extensions": [
+          ".aqml"
+        ],
         "configuration": "./language-configuration.json",
         "icon": {
-          "light": "icon.png",
-          "dark": "icon.png"
+          "light": "./media/aqml-file-light.svg",
+          "dark": "./media/aqml-file-dark.svg"
         }
       }
     ],
@@ -52,6 +78,12 @@
       {
         "language": "aqml",
         "path": "./snippets/aqml.json"
+      }
+    ],
+    "yamlValidation": [
+      {
+        "fileMatch": "*.aqml",
+        "url": "./schema/aqml.schema.json"
       }
     ]
   }

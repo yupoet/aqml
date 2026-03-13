@@ -1,0 +1,46 @@
+name: vscode-extension
+
+on:
+  pull_request:
+    paths:
+      - "editors/vscode/**"
+      - "spec/schema.json"
+  push:
+    branches:
+      - main
+    paths:
+      - "editors/vscode/**"
+      - "spec/schema.json"
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: editors/vscode
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: editors/vscode/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify bundled schema
+        run: npm run check:schema
+
+      - name: Package VSIX
+        run: npm run package
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqml-vscode-vsix
+          path: editors/vscode/*.vsix

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="AQML file icon">
+  <rect x="8" y="6" width="48" height="52" rx="8" fill="#F4F0E8" stroke="#0D223A" stroke-width="3"/>
+  <path d="M43 6v14h13" fill="#E4D4B7"/>
+  <path d="M43 6l13 14" fill="none" stroke="#0D223A" stroke-width="3"/>
+  <path d="M17 45l8-22h4l8 22h-4.5l-1.6-4.7H23l-1.6 4.7H17zm7.3-8.2h5.4L27 28.7l-2.7 8.1z" fill="#0D223A"/>
+  <path d="M38.5 45V23h4.6l5.2 8.5 5.1-8.5H58v22h-4.2V30.7l-5.6 9.1-5.5-9.1V45h-4.2z" fill="#D4A853"/>
+</svg>

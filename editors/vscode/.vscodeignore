@@ -1,0 +1,6 @@
+.github/**
+node_modules/**
+scripts/**
+*.vsix
+package-lock.json
+RELEASING.md

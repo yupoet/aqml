@@ -116,7 +116,10 @@ def test_parse_invalid_raises() -> None:
         parse("version: '2.0'\nname: bad\n")
 
 
-def test_packaged_schema_matches_repo_schema() -> None:
-    packaged = schema_path().read_text(encoding="utf-8")
+def test_generated_schema_copies_match_repo_schema() -> None:
     repo = Path("spec/schema.json").read_text(encoding="utf-8")
+    packaged = schema_path().read_text(encoding="utf-8")
+    vscode = Path("editors/vscode/schema/aqml.schema.json").read_text(encoding="utf-8")
+
     assert packaged == repo
+    assert vscode == repo

@@ -162,7 +162,7 @@ The `.aqml` extension establishes AQML as a first-class file format with dedicat
 
 | IDE | Support | Install |
 |-----|---------|---------|
-| **VS Code** | Syntax highlighting + snippets | [Extension](editors/vscode/) |
+| **VS Code** | Syntax highlighting + snippets + YAML schema validation | [Extension](editors/vscode/) |
 | **JetBrains** | File type recognition + highlighting | [Plugin](editors/jetbrains/) |
 | **Vim / Neovim** | Filetype detection + YAML highlighting | [Config](editors/vim/) |
 | **GitHub** | Syntax highlighting in repos | Automatic via `.gitattributes` |
@@ -197,7 +197,7 @@ result = validate("examples/simple-rsi.aqml")
 strategy = parse("examples/simple-rsi.aqml")
 ```
 
-GitHub Actions now cover CI, wheel/sdist builds, and PyPI/TestPyPI release flow for the validator package.
+GitHub Actions now cover CI, wheel/sdist builds, and PyPI/TestPyPI release flow for the validator package. The VS Code extension is also packaged as a `.vsix` with a dedicated GitHub Actions workflow and Marketplace publish flow.
 
 ## Roadmap
 
@@ -206,7 +206,7 @@ GitHub Actions now cover CI, wheel/sdist builds, and PyPI/TestPyPI release flow 
 - [x] Example strategy library synced to the executable parser
 - [x] Nested logic groups, `compare_all`, and tiered scoring
 - [x] Python validator package (`aqml-validator`)
-- [ ] VS Code extension packaging
+- [x] VS Code extension packaging
 - [ ] Strategy template gallery
 - [ ] Multi-language validator (JavaScript, Go)
 - [ ] AQML v3.0: multi-asset strategies and custom factor expressions

@@ -1,30 +1,47 @@
 # AQML for Visual Studio Code
 
-Syntax highlighting, snippets, and language support for [AQML](https://github.com/yupoet/aqml) (Aurum Quant Markup Language) strategy files.
+Syntax highlighting, schema-aware validation, and snippets for [AQML](https://github.com/yupoet/aqml) (Aurum Quant Markup Language) strategy files.
 
-This editor bundle targets the **AQML v2 executable profile** used by AurumQ.
+This extension targets the **AQML v2 executable profile** used by AurumQ.
 
 ## Features
 
-- 🎨 **Syntax highlighting** — AQML-aware colors for rule types, indicators, signals, operators
-- ⚡ **Snippets** — Rapid strategy authoring with `aqml`, `rule-compare`, `rule-signal`, etc.
-- 📁 **File association** — Automatic `.aqml` file recognition
-- 🔤 **Comment toggling** — `Ctrl+/` for `#` comments
-- 📐 **Code folding** — Collapse sections by indentation
+- Syntax highlighting for AQML sections, rule types, indicators, operators, and signals
+- Snippets for common strategy blocks such as `aqml`, `rule-compare`, `rule-signal`, and `portfolio`
+- Automatic `.aqml` file association
+- YAML schema validation, hover text, and completion through the Red Hat YAML extension
+- Bundled local schema copy so validation works from the packaged `.vsix`
 
 ## Installation
 
-### From VS Code Marketplace (coming soon)
+### VSIX Package
 
+```bash
+cd editors/vscode
+npm ci
+npm run package
+code --install-extension ./aqml-vscode-0.3.0.vsix
 ```
-ext install aurumq.aqml
+
+### Marketplace
+
+After the extension is published to the VS Code Marketplace:
+
+```bash
+code --install-extension aurumq.aqml
 ```
 
-### Manual Installation
+The extension declares `redhat.vscode-yaml` as a dependency, so VS Code will install the YAML language support automatically.
 
-1. Copy this `vscode/` directory to `~/.vscode/extensions/aqml-0.2.0/`
-2. Restart VS Code
-3. Open any `.aqml` file
+## Packaging
+
+```bash
+cd editors/vscode
+npm ci
+npm run package
+```
+
+This produces a versioned `.vsix` and refreshes `schema/aqml.schema.json` from `../../spec/schema.json` before packaging.
 
 ## Snippets
 
@@ -45,12 +62,8 @@ ext install aurumq.aqml
 | `portfolio` | Portfolio block |
 | `risk` | Risk management block |
 
-## Highlighting Preview
+## Release Flow
 
-AQML highlighting distinguishes:
-- **Section keywords** (`rules`, `exit_rules`, `portfolio`, `risk`) — bold accent
-- **Rule types** (`compare`, `compare_all`, `signal`, `breakout`) — type color
-- **Indicators** (`rsi14`, `macd_dif`, `ma20`) — variable color
-- **Signals** (`golden_cross`, `oversold`) — constant color
-- **Operators** (`>`, `<=`, `!=`) — operator color
-- **Numbers** and **strings** — standard literal colors
+- CI packaging: [`.github/workflows/vscode-extension.yml`](../../.github/workflows/vscode-extension.yml)
+- Marketplace publish: [`.github/workflows/publish-vscode-extension.yml`](../../.github/workflows/publish-vscode-extension.yml)
+- Release guide: [`RELEASING.md`](RELEASING.md)

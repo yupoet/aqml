@@ -23,6 +23,8 @@ venv/
 # Node
 node_modules/
 package-lock.json
+!editors/vscode/package-lock.json
+*.vsix
 
 # Testing
 .pytest_cache/

@@ -145,6 +145,17 @@ pip install -e .
 aqml validate my-strategy.aqml
 ```
 
+For editor-time validation in VS Code:
+
+```bash
+cd editors/vscode
+npm ci
+npm run package
+code --install-extension ./aqml-vscode-0.3.0.vsix
+```
+
+The packaged extension wires `.aqml` files to the local AQML JSON Schema through the Red Hat YAML extension.
+
 If you have AurumQ locally, you can still cross-check against the current service validator:
 
 ```bash
