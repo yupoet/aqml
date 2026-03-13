@@ -4,7 +4,7 @@ IDE and editor integrations for `.aqml` files.
 
 | Editor | Features | Directory |
 |--------|----------|-----------|
-| **VS Code** | Syntax highlighting, 11 snippets, language config | [`vscode/`](vscode/) |
+| **VS Code** | Syntax highlighting, v2 snippets, language config | [`vscode/`](vscode/) |
 | **JetBrains** | File type recognition, 4-group keyword highlighting | [`jetbrains/`](jetbrains/) |
 | **Vim / Neovim** | Filetype detection, YAML-based syntax highlighting | [`vim/`](vim/) |
 
@@ -12,7 +12,7 @@ IDE and editor integrations for `.aqml` files.
 
 ### VS Code
 ```bash
-cp -r editors/vscode ~/.vscode/extensions/aqml-0.1.0
+cp -r editors/vscode ~/.vscode/extensions/aqml-0.2.0
 # Restart VS Code
 ```
 

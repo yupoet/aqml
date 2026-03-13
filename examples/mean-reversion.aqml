@@ -3,73 +3,57 @@
 # 布林带均值回归策略 — 价格触及下轨 + RSI 超卖 + 基本面过滤
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Bollinger Mean Reversion
 description: >
   Identifies stocks trading near their Bollinger Band lower bound
   with RSI confirmation and fundamental quality filters.
   Targets mean-reversion to the middle band.
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 50.0
 metadata:
   author: Paris Yu
   created_at: "2026-03-01"
   tags: [mean-reversion, bollinger, value, quality]
-  category: mean-reversion
+  category: mean_reversion
 
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE, new_listing]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 5000000000  # Market cap > 5B CNY
-
 rules:
-  # Price near lower Bollinger Band
   - type: breakout
-    name: Near Lower Band
-    field: close
-    reference: boll_lower
-    direction: below
-    confirmation_bars: 0
-    weight: 35
-
-  # RSI showing oversold
+    price: close
+    level: boll_lower
+    direction: down
+    comment: Near Lower Band
   - type: range
-    name: RSI Oversold Zone
-    field: rsi14
+    indicator: rsi14
     min: 15
     max: 35
-    weight: 30
-
-  # Reasonable PE ratio
+    comment: RSI Oversold Zone
   - type: range
-    name: PE Filter
-    field: pe_ttm
+    indicator: pe_ttm
     min: 5
     max: 30
-    weight: 20
-
-  # Positive ROE (profitable company)
+    comment: PE Filter
   - type: compare
-    name: Profitable
-    field: roe
+    left: roe
     operator: ">"
-    value: 5
-    weight: 15
-
+    right: 5
+    comment: Profitable
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 55
-
+  rule_points:
+    - points: 35
+    - points: 30
+    - points: 20
+    - points: 15
 exit_rules:
-  stop_loss: 0.04
-  take_profit: 0.10
+  stop_loss_pct: 4.0
+  take_profit_pct: 10.0
   max_holding_days: 15
-
 portfolio:
   method: equal_weight
   max_positions: 15

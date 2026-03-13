@@ -13,8 +13,7 @@
 #    near mid-band as chip consolidation proxies.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Chip Concentration
 description: >
   ⚠️ Approximation of the chip distribution factor from Guangfa
@@ -26,13 +25,13 @@ description: >
   ⚠️ 广发证券筹码分布因子的近似版本。原策略构建换手率加权成本分布，
   计算 ARC/VRC/SRC/KRC 四维筹码指标；本版本使用布林收窄 + 价格
   贴近中轨 + 缩量作为筹码集中的代理信号。
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 30.0
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [chip, cost-distribution, consolidation, bollinger, approximation]
-  category: breakout
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/B-因子构建类/筹码因子"
   original_file: "筹码分布因子.ipynb"
   reference_paper: "《广发证券-多因子Alpha系列报告之（二十七）——基于筹码分布的选股策略》"
@@ -45,67 +44,92 @@ metadata:
     The original builds turnover-decay-weighted 60-day cost distribution.
     This version uses Bollinger squeeze + mid-band proximity + low volume.
 
+  category: breakout
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE, new_listing]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 3000000000
-
 rules:
-  # Bollinger squeeze — bandwidth contraction = chip concentration
-  - type: signal
-    name: Chip Consolidation (Bollinger Squeeze)
-    indicator: boll
-    signal: squeeze
-    lookback: 10
-    weight: 30
-    # APPROX: 原策略使用 VRC（成本分布方差）低值
-    # Original uses low VRC (cost distribution variance)
-    # Bollinger squeeze reflects low price dispersion ≈ chip concentration
-
-  # Volume contraction — holders not selling, chips locked
+  - logic: or
+    comment: Chip Consolidation (Bollinger Squeeze)
+    conditions:
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: 0
+        comment: Chip Consolidation (Bollinger Squeeze)
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -1
+        comment: Chip Consolidation (Bollinger Squeeze)
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -2
+        comment: Chip Consolidation (Bollinger Squeeze)
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -3
+        comment: Chip Consolidation (Bollinger Squeeze)
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -4
+        comment: Chip Consolidation (Bollinger Squeeze)
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -5
+        comment: Chip Consolidation (Bollinger Squeeze)
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -6
+        comment: Chip Consolidation (Bollinger Squeeze)
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -7
+        comment: Chip Consolidation (Bollinger Squeeze)
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -8
+        comment: Chip Consolidation (Bollinger Squeeze)
+      - type: signal
+        indicator: boll
+        signal: squeeze
+        offset: -9
+        comment: Chip Consolidation (Bollinger Squeeze)
   - type: compare
-    name: Volume Contraction
-    field: volume
+    left: volume
     operator: "<"
-    reference: volume_ma20
-    weight: 25
-    # APPROX: 原策略用换手率衰减系数判断锁仓
-    # Original uses turnover decay coefficient for lock-up detection
-    # Low volume relative to MA20 indicates reduced selling pressure
-
-  # Price near MA20 (cost center proxy)
+    right: volume_ma20
+    comment: Volume Contraction
   - type: compare
-    name: Near Cost Center
-    field: close
+    left: close
     operator: ">"
-    reference: ma20
-    weight: 25
-    # APPROX: 原策略使用 ARC ≈ 0（价格接近平均持仓成本）
-    # Original uses ARC ≈ 0 (price near average holding cost)
-    # Price near MA20 approximates the cost center
-
-  # Positive ROE — quality underlying
+    right: ma20
+    comment: Near Cost Center
   - type: compare
-    name: Quality Filter
-    field: roe
+    left: roe
     operator: ">"
-    value: 8
-    weight: 20
-
+    right: 8
+    comment: Quality Filter
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 55
-
+  rule_points:
+    - points: 30
+    - points: 25
+    - points: 25
+    - points: 20
 exit_rules:
-  stop_loss: 0.05
-  take_profit: 0.15
-  trailing_stop: 0.08
+  stop_loss_pct: 5.0
+  take_profit_pct: 15.0
+  trailing_stop_pct: 8.0
   max_holding_days: 20
-
 portfolio:
   method: equal_weight
   max_positions: 15

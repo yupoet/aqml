@@ -13,8 +13,7 @@
 #    expansion as regime detection proxy.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Bull-Bear Regime
 description: >
   ⚠️ Approximation of the CSVC (Cross-Sectional Volatility and
@@ -27,13 +26,11 @@ description: >
   ⚠️ 天风证券 CSVC 框架熊牛指标的近似版本。原策略使用250日滚动波动率
   与换手率的比值（σ/τ）构建熊牛指标，kernel 与价格负相关（r≈-0.55），
   kernel 下穿均线买入。本版本使用均线排列 + ADX + 量能作为近似。
-version: "1.0.0"
-
+signal_type: buy
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [csvc, bull-bear, regime, volatility, turnover, approximation]
-  category: momentum
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/CSVC框架及熊牛指标"
   original_file: "py/波动率和换手率构建牛熊指标.ipynb"
   reference_paper: "《天风证券-CSVC框架及熊牛指标研究》"
@@ -47,64 +44,43 @@ metadata:
     The original uses σ/τ ratio with inverse correlation to price.
     This version uses MA alignment + ADX + volume as bull proxy.
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-
 rules:
-  # MA20 above MA60 — medium-term bullish regime
   - type: compare
-    name: Bullish MA Alignment
-    field: ma20
+    left: ma20
     operator: ">"
-    reference: ma60
-    weight: 30
-    # APPROX: 原策略使用 kernel 下穿均线（反向指标）
-    # Original uses kernel crossing below MA (inverse indicator)
-    # MA20 > MA60 captures medium-term bullish regime directly
-
-  # ADX above 25 — strong trending environment
+    right: ma60
+    comment: Bullish MA Alignment
   - type: compare
-    name: Strong Trend Regime
-    field: dmi_adx
+    left: dmi_adx
     operator: ">"
-    value: 25
-    weight: 25
-    # APPROX: 原策略的牛市状态=波动率↑ + 换手率↑
-    # Original bull state = vol↑ + turnover↑
-    # ADX > 25 confirms a strong directional trend
-
-  # Volume above MA20 — active turnover (bull characteristic)
+    right: 25
+    comment: Strong Trend Regime
   - type: compare
-    name: Active Turnover
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma20
-    weight: 25
-    # APPROX: 原策略使用换手率活跃度作为牛市特征
-    # Original uses turnover activity as bull regime feature
-    # Volume expansion indicates market participation
-
-  # RSI in bullish range (not extreme)
+    right: volume_ma20
+    comment: Active Turnover
   - type: range
-    name: Healthy Momentum
-    field: rsi14
+    indicator: rsi14
     min: 40
     max: 70
-    weight: 20
-    # APPROX: 原策略的 kernel 值处于合理区间
-    # Original kernel in reasonable range for bull regime
-    # RSI 40-70 filters out exhaustion extremes
-
+    comment: Healthy Momentum
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 30
+    - points: 25
+    - points: 25
+    - points: 20
 exit_rules:
-  stop_loss: 0.07
-  trailing_stop: 0.10
+  stop_loss_pct: 7.0
+  trailing_stop_pct: 10.0
   max_holding_days: 30
-
 portfolio:
   method: equal_weight
   max_positions: 10

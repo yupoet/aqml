@@ -4,8 +4,7 @@
 # Source: hugo2046/QuantsPlaybook (中泰证券研报复现)
 # ================================================================
 
-aqml: "1.0"
-
+version: "2.0"
 name: ICU Moving Average Timing
 description: >
   Based on Zhongtai Securities research on the ICU (Intelligent
@@ -14,66 +13,55 @@ description: >
   one of the most robust absolute-return tools. This AQML adaptation
   uses EMA crossovers with trend and volatility confirmation.
   中泰证券研究表明，均线交叉配合适当过滤条件仍是最稳健的绝对收益工具。
-version: "1.0.0"
-
+signal_type: buy
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [ema, crossover, timing, trend, absolute-return]
-  category: momentum
   source: "hugo2046/QuantsPlaybook/C-择时类/ICU均线"
   source_license: "Unlicensed"
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-
 rules:
-  # EMA5 above EMA20 — short-term trend bullish
   - type: compare
-    name: EMA Short Above Long
-    field: ema5
+    left: ema5
     operator: ">"
-    reference: ema20
-    weight: 35
-
-  # Close above EMA60 — medium-term support
+    right: ema20
+    comment: EMA Short Above Long
   - type: compare
-    name: Above EMA60
-    field: close
+    left: close
     operator: ">"
-    reference: ema60
-    weight: 25
-
-  # Supertrend bullish — trend confirmation
+    right: ema60
+    comment: Above EMA60
   - type: compare
-    name: Supertrend Bullish
-    field: supertrend
+    left: supertrend
     operator: "<"
-    reference: close
-    weight: 25
-
-  # Volume above 5-day average
+    right: close
+    comment: Supertrend Bullish
   - type: compare
-    name: Volume Confirmation
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma5
-    weight: 15
-
+    right: volume_ma5
+    comment: Volume Confirmation
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 35
+    - points: 25
+    - points: 25
+    - points: 15
 exit_rules:
-  stop_loss: 0.05
-  trailing_stop: 0.08
+  stop_loss_pct: 5.0
+  trailing_stop_pct: 8.0
   max_holding_days: 20
-
 portfolio:
   method: equal_weight
   max_positions: 10
 
 risk:
-  max_drawdown: 0.12
-  max_single_position: 0.10
+  max_drawdown: 12.0
+  max_single_position: 10.0

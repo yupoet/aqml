@@ -37,9 +37,9 @@ Replace `<IDE>` with your specific IDE name (e.g., `PyCharm2024.3`, `IntelliJIde
 | Group | Color | Contents |
 |-------|-------|----------|
 | Keywords 1 | Bold accent | Top-level sections (`rules`, `portfolio`, `risk`) |
-| Keywords 2 | Secondary | Field names (`field`, `operator`, `weight`) |
-| Keywords 3 | Type color | Rule types and signals (`compare`, `golden_cross`) |
-| Keywords 4 | Constant color | Enums and values (`weighted`, `kelly`, `ST`) |
+| Keywords 2 | Secondary | Field names (`left`, `right`, `comment`, `rule_points`) |
+| Keywords 3 | Type color | Rule types and signals (`compare_all`, `golden_cross`) |
+| Keywords 4 | Constant color | Enums and values (`buy`, `sell`, `up`, `ST`) |
 
 ## YAML Base Support
 

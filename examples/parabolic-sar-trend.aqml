@@ -4,8 +4,7 @@
 # Source: je-suis-tm/quant-trading (Apache 2.0)
 # ================================================================
 
-aqml: "1.0"
-
+version: "2.0"
 name: Parabolic SAR Trend Following
 description: >
   Parabolic SAR (Stop and Reverse) places dots above or below price to
@@ -14,58 +13,49 @@ description: >
   flips above. This AQML adaptation combines SAR with DMI trend strength
   confirmation and volume filters.
   抛物线转向指标：SAR 低于价格时为上升趋势，结合 ADX 趋势强度确认。
-version: "1.0.0"
-
+signal_type: buy
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [sar, trend-following, momentum, adx]
-  category: momentum
   source: "je-suis-tm/quant-trading/Parabolic SAR backtest.py"
   source_license: "Apache-2.0"
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-
 rules:
-  # SAR below price — uptrend signal
   - type: compare
-    name: SAR Bullish
-    field: sar
+    left: sar
     operator: "<"
-    reference: close
-    weight: 40
-
-  # ADX above 25 — strong trend
+    right: close
+    comment: SAR Bullish
   - type: compare
-    name: Strong Trend
-    field: dmi_adx
+    left: dmi_adx
     operator: ">"
-    value: 25
-    weight: 30
-
-  # DMI+ above DMI- — bullish directional movement
+    right: 25
+    comment: Strong Trend
   - type: compare
-    name: DMI Bullish
-    field: dmi_plus
+    left: dmi_plus
     operator: ">"
-    reference: dmi_minus
-    weight: 30
-
+    right: dmi_minus
+    comment: DMI Bullish
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 40
+    - points: 30
+    - points: 30
 exit_rules:
-  stop_loss: 0.06
-  trailing_stop: 0.10
+  stop_loss_pct: 6.0
+  trailing_stop_pct: 10.0
   max_holding_days: 30
-
 portfolio:
   method: equal_weight
   max_positions: 10
 
 risk:
-  max_drawdown: 0.15
-  max_single_position: 0.10
+  max_drawdown: 15.0
+  max_single_position: 10.0

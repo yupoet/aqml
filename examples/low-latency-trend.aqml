@@ -12,8 +12,7 @@
 #    buy signal. This version uses EMA crossover + MACD as proxy.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Low-Latency Trend
 description: >
   ⚠️ Approximation of the Low-Lag Trendline timing model from
@@ -25,13 +24,11 @@ description: >
   ⚠️ 国泰君安低延迟趋势线择时模型的近似版本。原策略实现 LLT 滤波器、
   FRAMA 分形自适应均线、HMA 赫尔均线三种低延迟趋势线，利用趋势线斜率
   > 0 作为买入信号。本版本使用快速 EMA 交叉 + MACD 动量作为近似。
-version: "1.0.0"
-
+signal_type: buy
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [low-lag, trend, llt, frama, hma, ema, approximation]
-  category: momentum
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/低延迟趋势线与交易择时"
   original_file: "py/低延迟趋势线与交易择时.ipynb"
   reference_paper: "《20190311-国泰君安-低延迟趋势线与交易择时》"
@@ -45,58 +42,43 @@ metadata:
     The original uses LLT/FRAMA/HMA low-lag filters with slope signals.
     This version uses fast EMA crossover + MACD as trend proxy.
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-
 rules:
-  # EMA5 above EMA20 — fast trend direction (low-lag proxy)
   - type: compare
-    name: Fast EMA Crossover
-    field: ema5
+    left: ema5
     operator: ">"
-    reference: ema20
-    weight: 35
-    # APPROX: 原策略使用 LLT 滤波器斜率 > 0
-    # Original uses LLT filter slope > 0
-    # EMA5 > EMA20 captures fast trend shift with minimal lag
-
-  # MACD histogram positive — momentum confirmation
+    right: ema20
+    comment: Fast EMA Crossover
   - type: compare
-    name: MACD Momentum
-    field: macd_hist
+    left: macd_hist
     operator: ">"
-    value: 0
-    weight: 25
-    # APPROX: 原策略使用22日滚动斜率 > 阈值
-    # Original uses 22-day rolling slope > threshold
-    # MACD histogram direction approximates trend slope sign
-
-  # Close above EMA10 — price confirmation
+    right: 0
+    comment: MACD Momentum
   - type: compare
-    name: Price Above Fast Trend
-    field: close
+    left: close
     operator: ">"
-    reference: ema10
-    weight: 25
-
-  # ADX above 20 — trend is meaningful
+    right: ema10
+    comment: Price Above Fast Trend
   - type: compare
-    name: Trend Strength
-    field: dmi_adx
+    left: dmi_adx
     operator: ">"
-    value: 20
-    weight: 15
-
+    right: 20
+    comment: Trend Strength
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 35
+    - points: 25
+    - points: 25
+    - points: 15
 exit_rules:
-  stop_loss: 0.05
-  trailing_stop: 0.08
+  stop_loss_pct: 5.0
+  trailing_stop_pct: 8.0
   max_holding_days: 25
-
 portfolio:
   method: equal_weight
   max_positions: 10

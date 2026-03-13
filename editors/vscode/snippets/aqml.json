@@ -1,38 +1,41 @@
 {
   "AQML Strategy Skeleton": {
     "prefix": "aqml",
-    "description": "Complete AQML strategy scaffold",
+    "description": "Complete AQML v2 strategy scaffold",
     "body": [
-      "aqml: \"1.0\"",
+      "version: \"2.0\"",
       "",
       "name: ${1:Strategy Name}",
       "description: \"${2:Brief description}\"",
-      "version: \"1.0.0\"",
+      "signal_type: ${3|buy,sell|}",
       "",
-      "metadata:",
-      "  author: ${3:Author}",
-      "  created_at: \"${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}\"",
-      "  tags: [${4:momentum}]",
-      "  category: ${5|momentum,value,mean-reversion,breakout,fundamental,composite|}",
-      "",
-      "universe:",
-      "  market: A-shares",
-      "  exclude: [ST, STAR, BSE]",
+      "filters:",
+      "  exclude_st: true",
+      "  exclude_kcb: true",
+      "  exclude_bj: true",
       "",
       "rules:",
-      "  - type: ${6|compare,range,signal,pattern,breakout|}",
-      "    field: ${7:rsi14}",
-      "    operator: \"${8|<,<=,>,>=,==,!=|}\"",
-      "    value: ${9:30}",
+      "  - type: compare",
+      "    left: ${4:close}",
+      "    operator: \"${5|>,>=,<,<=,==,!=|}\"",
+      "    right: ${6:ma20}",
+      "    comment: \"${7:Close above MA20}\"",
+      "",
+      "scoring:",
+      "  max_score: ${8:100}",
+      "  min_score: ${9:60}",
+      "  rule_points:",
+      "    - points: ${10:100}",
       "",
       "exit_rules:",
-      "  stop_loss: ${10:0.05}",
-      "  take_profit: ${11:0.15}",
-      "  max_holding_days: ${12:20}",
+      "  stop_loss_pct: ${11:5.0}",
+      "  take_profit_pct: ${12:15.0}",
+      "  max_holding_days: ${13:20}",
       "",
       "portfolio:",
-      "  method: ${13|equal_weight,score_weighted,kelly,risk_parity|}",
-      "  max_positions: ${14:10}",
+      "  method: ${14|equal_weight,score_weighted|}",
+      "  max_positions: ${15:10}",
+      "  initial_capital: ${16:1000000}",
       "$0"
     ]
   },
@@ -41,24 +44,23 @@
     "description": "AQML compare rule",
     "body": [
       "- type: compare",
-      "  name: ${1:Rule Name}",
-      "  field: ${2:rsi14}",
-      "  operator: \"${3|<,<=,>,>=,==,!=|}\"",
-      "  value: ${4:30}",
-      "  weight: ${5:30}"
+      "  left: ${1:close}",
+      "  operator: \"${2|>,>=,<,<=,==,!=|}\"",
+      "  right: ${3:ma20}",
+      "  comment: \"${4:Close above MA20}\""
     ]
   },
-  "Compare Reference Rule": {
-    "prefix": "rule-compare-ref",
-    "description": "AQML compare rule against another field",
+  "Compare All Rule": {
+    "prefix": "rule-compare-all",
+    "description": "AQML compare_all rule",
     "body": [
-      "- type: compare",
-      "  name: ${1:Rule Name}",
-      "  field: ${2:close}",
-      "  operator: \"${3|>,>=,<,<=|}\"",
-      "  reference: ${4:ma20}",
-      "  multiplier: ${5:1.0}",
-      "  weight: ${6:30}"
+      "- type: compare_all",
+      "  price: ${1:close}",
+      "  indicators: [${2:ma60}, ${3:ma90}, ${4:ma125}, ${5:ma250}]",
+      "  operator: \"${6|>,>=,<,<=|}\"",
+      "  min_above_pct: ${7:1.0}",
+      "  max_above_pct: ${8:5.0}",
+      "  comment: \"${9:Above all long moving averages}\""
     ]
   },
   "Range Rule": {
@@ -66,11 +68,10 @@
     "description": "AQML range rule",
     "body": [
       "- type: range",
-      "  name: ${1:Rule Name}",
-      "  field: ${2:pe_ttm}",
-      "  min: ${3:5}",
-      "  max: ${4:25}",
-      "  weight: ${5:25}"
+      "  indicator: ${1:rsi14}",
+      "  min: ${2:0}",
+      "  max: ${3:30}",
+      "  comment: \"${4:RSI oversold}\""
     ]
   },
   "Signal Rule": {
@@ -78,11 +79,10 @@
     "description": "AQML signal detection rule",
     "body": [
       "- type: signal",
-      "  name: ${1:Rule Name}",
-      "  indicator: ${2|macd,kdj,ma,boll|}",
-      "  signal: ${3|golden_cross,death_cross,overbought,oversold|}",
-      "  lookback: ${4:3}",
-      "  weight: ${5:35}"
+      "  indicator: ${1|macd,kdj,ma|}",
+      "  signal: ${2|golden_cross,death_cross|}",
+      "  offset: ${3:0}",
+      "  comment: \"${4:Signal detected}\""
     ]
   },
   "Pattern Rule": {
@@ -90,10 +90,9 @@
     "description": "AQML candlestick pattern rule",
     "body": [
       "- type: pattern",
-      "  name: ${1:Rule Name}",
-      "  pattern: ${2|hammer,engulfing_bull,engulfing_bear,doji,morning_star|}",
-      "  lookback: ${3:5}",
-      "  weight: ${4:20}"
+      "  pattern: ${1|hammer,engulfing_bull,engulfing_bear,doji,morning_star,evening_star|}",
+      "  offset: ${2:0}",
+      "  comment: \"${3:Pattern matched}\""
     ]
   },
   "Breakout Rule": {
@@ -101,12 +100,42 @@
     "description": "AQML breakout detection rule",
     "body": [
       "- type: breakout",
-      "  name: ${1:Rule Name}",
-      "  field: ${2:close}",
-      "  reference: ${3:boll_upper}",
-      "  direction: ${4|above,below|}",
-      "  confirmation_bars: ${5:1}",
-      "  weight: ${6:30}"
+      "  price: ${1:close}",
+      "  level: ${2:boll_upper}",
+      "  direction: ${3|up,down|}",
+      "  offset: ${4:0}",
+      "  comment: \"${5:Breakout detected}\""
+    ]
+  },
+  "OR Logic Group": {
+    "prefix": "rule-or",
+    "description": "AQML OR logic group",
+    "body": [
+      "- logic: or",
+      "  comment: \"${1:Any condition passes}\"",
+      "  conditions:",
+      "    - type: signal",
+      "      indicator: ${2|macd,kdj,ma|}",
+      "      signal: ${3|golden_cross,death_cross|}",
+      "      offset: 0",
+      "      comment: \"${4:Primary signal}\"",
+      "    - type: signal",
+      "      indicator: ${5|macd,kdj,ma|}",
+      "      signal: ${6|golden_cross,death_cross|}",
+      "      offset: -1",
+      "      comment: \"${7:Secondary signal}\""
+    ]
+  },
+  "Filters Block": {
+    "prefix": "filters",
+    "description": "AQML filters configuration",
+    "body": [
+      "filters:",
+      "  exclude_st: true",
+      "  exclude_kcb: true",
+      "  exclude_bj: true",
+      "  min_market_cap: ${1:30}",
+      "  min_amount: ${2:5000}"
     ]
   },
   "Scoring Block": {
@@ -114,8 +143,21 @@
     "description": "AQML scoring configuration",
     "body": [
       "scoring:",
-      "  mode: ${1|weighted,equal,threshold|}",
-      "  min_score: ${2:60}"
+      "  max_score: ${1:100}",
+      "  min_score: ${2:60}",
+      "  rule_points:",
+      "    - points: ${3:50}",
+      "    - points: ${4:50}"
+    ]
+  },
+  "Tiered Rule Points": {
+    "prefix": "scoring-tier",
+    "description": "AQML tiered scoring entry",
+    "body": [
+      "- points: ${1:40}",
+      "  tiers:",
+      "    - condition: {indicator: ${2:rsi14}, min: ${3:30}, max: ${4:40}}",
+      "      points: ${5:20}"
     ]
   },
   "Exit Rules Block": {
@@ -123,9 +165,9 @@
     "description": "AQML exit rules",
     "body": [
       "exit_rules:",
-      "  stop_loss: ${1:0.05}",
-      "  take_profit: ${2:0.15}",
-      "  trailing_stop: ${3:0.08}",
+      "  stop_loss_pct: ${1:5.0}",
+      "  take_profit_pct: ${2:15.0}",
+      "  trailing_stop_pct: ${3:8.0}",
       "  max_holding_days: ${4:20}"
     ]
   },
@@ -134,10 +176,9 @@
     "description": "AQML portfolio configuration",
     "body": [
       "portfolio:",
-      "  method: ${1|equal_weight,score_weighted,market_cap_weighted,kelly,risk_parity|}",
+      "  method: ${1|equal_weight,score_weighted|}",
       "  max_positions: ${2:10}",
-      "  max_sector_pct: ${3:0.30}",
-      "  rebalance: ${4|daily,weekly,biweekly,monthly|}"
+      "  initial_capital: ${3:1000000}"
     ]
   },
   "Risk Block": {
@@ -145,9 +186,8 @@
     "description": "AQML risk management parameters",
     "body": [
       "risk:",
-      "  max_drawdown: ${1:0.15}",
-      "  max_single_position: ${2:0.10}",
-      "  max_sector_concentration: ${3:0.30}"
+      "  max_drawdown: ${1:15.0}",
+      "  max_single_position: ${2:10.0}"
     ]
   }
 }

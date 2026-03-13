@@ -4,14 +4,13 @@
 # Difficulty: ⭐ Beginner
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Simple RSI Screen
 description: >
   The simplest possible AQML strategy — screens for stocks
   with RSI(14) below 30, indicating potential oversold conditions.
   A good starting point for learning AQML syntax.
-
+signal_type: buy
 metadata:
   author: AQML Examples
   tags: [beginner, rsi, oversold]
@@ -20,9 +19,9 @@ metadata:
 universe:
   market: A-shares
   exclude: [ST]
-
 rules:
   - type: compare
-    field: rsi14
+    left: rsi14
     operator: "<"
-    value: 30
+    right: 30
+    comment: rsi14 < 30

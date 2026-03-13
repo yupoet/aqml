@@ -12,8 +12,7 @@
 #    This version uses volume anomaly + ATR expansion as proxy.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Turnover Activity
 description: >
   ⚠️ Approximation of the amplitude factor hidden structure model
@@ -24,13 +23,13 @@ description: >
   ⚠️ 东吴证券振幅因子隐藏结构模型的近似版本。原策略按价格区间拆分
   每日振幅，低价区高振幅=吸筹（看多），高价区高振幅=派发（看空）。
   本版本使用成交量异动 + ATR 作为活跃度检测的代理信号。
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 30.0
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [amplitude, turnover, activity, volume, approximation]
-  category: momentum
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/B-因子构建类/振幅因子的隐藏结构"
   original_file: "notebook/振幅因子的隐藏结构.ipynb"
   reference_paper: "《20200516-开源证券-市场微观结构研究系列（7）：振幅因子的隐藏结构》"
@@ -42,64 +41,44 @@ metadata:
     The original decomposes amplitude by price zone.
     This version uses volume anomaly + ATR at low prices as proxy.
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 3000000000
-
 rules:
-  # Volume anomaly — significant activity spike
   - type: compare
-    name: Volume Anomaly
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma20
-    multiplier: 2.0
-    weight: 35
-    # APPROX: 原策略使用换手率因子排名
-    # Original ranks by turnover factor
-    # Volume > 2x MA20 captures anomalous activity
-
-  # RSI in low-to-mid zone — accumulation at lower prices
+    right: volume_ma20
+    right_multiplier: 2.0
+    comment: Volume Anomaly
   - type: range
-    name: Low Price Zone Activity
-    field: rsi14
+    indicator: rsi14
     min: 25
     max: 50
-    weight: 25
-    # APPROX: 原策略取低价区振幅高的标的
-    # Original selects high-amplitude stocks in low price zones
-    # RSI 25-50 captures activity in the lower price zone
-
-  # CCI showing upturn from extreme
+    comment: Low Price Zone Activity
   - type: compare
-    name: CCI Recovery
-    field: cci14
+    left: cci
     operator: ">"
-    value: -100
-    weight: 20
-
-  # Price above MA10 — short-term recovery
+    right: -100
+    comment: CCI Recovery
   - type: compare
-    name: Short-Term Recovery
-    field: close
+    left: close
     operator: ">"
-    reference: ma10
-    weight: 20
-
+    right: ma10
+    comment: Short-Term Recovery
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 55
-
+  rule_points:
+    - points: 35
+    - points: 25
+    - points: 20
+    - points: 20
 exit_rules:
-  stop_loss: 0.06
-  take_profit: 0.15
+  stop_loss_pct: 6.0
+  take_profit_pct: 15.0
   max_holding_days: 15
-
 portfolio:
   method: equal_weight
   max_positions: 12

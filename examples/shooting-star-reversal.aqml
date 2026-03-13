@@ -4,8 +4,7 @@
 # Source: je-suis-tm/quant-trading (Apache 2.0)
 # ================================================================
 
-aqml: "1.0"
-
+version: "2.0"
 name: Shooting Star Bearish Reversal
 description: >
   A shooting star is a bearish candlestick with a long upper wick,
@@ -15,63 +14,70 @@ description: >
   and next-candle confirmation. This AQML adaptation identifies the
   shooting star pattern in overbought conditions as a short/exit signal.
   流星线：上升趋势中出现长上影线小实体，为看跌反转信号。
-version: "1.0.0"
-
+signal_type: sell
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [candlestick, shooting-star, reversal, bearish]
-  category: mean-reversion
   source: "je-suis-tm/quant-trading/Shooting Star backtest.py"
   source_license: "Apache-2.0"
 
+  category: mean_reversion
 universe:
   market: A-shares
   exclude: [ST, STAR]
-
 rules:
-  # Evening star pattern — captures shooting star and similar bearish reversal
-  - type: pattern
-    name: Bearish Reversal Pattern
-    pattern: evening_star
-    lookback: 5
-    weight: 35
-
-  # RSI overbought — confirms exhaustion at top
+  - logic: or
+    comment: Bearish Reversal Pattern
+    conditions:
+      - type: pattern
+        pattern: evening_star
+        offset: 0
+        comment: Bearish Reversal Pattern
+      - type: pattern
+        pattern: evening_star
+        offset: -1
+        comment: Bearish Reversal Pattern
+      - type: pattern
+        pattern: evening_star
+        offset: -2
+        comment: Bearish Reversal Pattern
+      - type: pattern
+        pattern: evening_star
+        offset: -3
+        comment: Bearish Reversal Pattern
+      - type: pattern
+        pattern: evening_star
+        offset: -4
+        comment: Bearish Reversal Pattern
   - type: compare
-    name: RSI Overbought
-    field: rsi14
+    left: rsi14
     operator: ">"
-    value: 70
-    weight: 30
-
-  # Price above upper Bollinger Band — extended
+    right: 70
+    comment: RSI Overbought
   - type: breakout
-    name: Price Overextended
-    field: close
-    reference: boll_upper
-    direction: above
-    confirmation_bars: 0
-    weight: 20
-
-  # Volume spike — distribution signal
+    price: close
+    level: boll_upper
+    direction: up
+    comment: Price Overextended
   - type: compare
-    name: High Volume
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma10
-    multiplier: 1.5
-    weight: 15
-
+    right: volume_ma10
+    right_multiplier: 1.5
+    comment: High Volume
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 50
-
+  rule_points:
+    - points: 35
+    - points: 30
+    - points: 20
+    - points: 15
 exit_rules:
-  stop_loss: 0.05
-  take_profit: 0.10
+  stop_loss_pct: 5.0
+  take_profit_pct: 10.0
   max_holding_days: 7
-
 portfolio:
   method: equal_weight
   max_positions: 8

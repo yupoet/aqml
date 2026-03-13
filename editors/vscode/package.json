@@ -1,8 +1,8 @@
 {
   "name": "aqml",
   "displayName": "AQML — Aurum Quant Markup Language",
-  "description": "Syntax highlighting, validation, and snippets for AQML quantitative strategy files",
-  "version": "0.1.0",
+  "description": "Syntax highlighting, validation, and snippets for AQML v2 executable-profile strategy files",
+  "version": "0.2.0",
   "publisher": "aurumq",
   "license": "Apache-2.0",
   "icon": "icon.png",

@@ -12,8 +12,7 @@
 #    This version uses RSI oversold + Bollinger lower band breach.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Short-Term Reversal
 description: >
   ⚠️ Approximation of the W-cut microstructure reversal factor from
@@ -24,13 +23,13 @@ description: >
   as reversal signals, with volume confirmation.
   ⚠️ 开源证券 W 式切割微观反转因子的近似版本。原策略按成交均额分解
   收益率来区分机构与散户行为；本版本使用极端超卖 + 布林下轨突破近似。
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 30.0
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [reversal, microstructure, oversold, approximation]
-  category: mean-reversion
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/B-因子构建类/开源证券-市场微观结构研究系列（1）：A股反转之力的微观来源"
   reference_paper: "《20191223-开源证券-市场微观结构研究系列（1）：A股反转之力的微观来源》"
   approximation: true
@@ -41,65 +40,44 @@ metadata:
     The original uses deal-size-decomposed returns (W-cut).
     This version approximates with extreme RSI + Bollinger breach.
 
+  category: mean_reversion
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE, new_listing]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 3000000000
-
 rules:
-  # RSI6 extreme oversold — sharp short-term decline
   - type: compare
-    name: RSI6 Extreme Oversold
-    field: rsi6
+    left: rsi6
     operator: "<"
-    value: 20
-    weight: 35
-    # APPROX: 原策略取大单日反转收益最高的一组
-    # Original selects top reversal quintile from institutional returns
-    # Extreme RSI6 captures rapid overselling phase
-
-  # Price below Bollinger lower band
+    right: 20
+    comment: RSI6 Extreme Oversold
   - type: breakout
-    name: Below Lower Band
-    field: close
-    reference: boll_lower
-    direction: below
-    confirmation_bars: 0
-    weight: 30
-    # APPROX: 原策略用微观结构分解度量超卖深度
-    # Original measures oversold depth via microstructure decomposition
-    # Bollinger lower breach captures statistical extreme
-
-  # Williams %R oversold — multi-indicator confirmation
+    price: close
+    level: boll_lower
+    direction: down
+    comment: Below Lower Band
   - type: compare
-    name: Williams R Oversold
-    field: wr14
+    left: wr
     operator: "<"
-    value: -80
-    weight: 20
-
-  # Volume spike — potential capitulation
+    right: -80
+    comment: Williams R Oversold
   - type: compare
-    name: Volume Capitulation
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma10
-    multiplier: 1.5
-    weight: 15
-
+    right: volume_ma10
+    right_multiplier: 1.5
+    comment: Volume Capitulation
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 55
-
+  rule_points:
+    - points: 35
+    - points: 30
+    - points: 20
+    - points: 15
 exit_rules:
-  stop_loss: 0.05
-  take_profit: 0.10
+  stop_loss_pct: 5.0
+  take_profit_pct: 10.0
   max_holding_days: 10
-
 portfolio:
   method: equal_weight
   max_positions: 15

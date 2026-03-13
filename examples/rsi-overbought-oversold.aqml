@@ -4,8 +4,7 @@
 # Source: je-suis-tm/quant-trading (Apache 2.0)
 # ================================================================
 
-aqml: "1.0"
-
+version: "2.0"
 name: RSI Overbought-Oversold Reversal
 description: >
   A mean-reversion strategy based on RSI(14) boundaries. When RSI drops
@@ -14,67 +13,53 @@ description: >
   for bearish signals. This AQML version focuses on the oversold entry
   with fundamental quality filters to avoid value traps.
   RSI 低于 30 为超卖信号，结合基本面过滤避免"价值陷阱"。
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 50.0
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [rsi, oversold, mean-reversion, fundamental]
-  category: mean-reversion
   source: "je-suis-tm/quant-trading/RSI Pattern Recognition backtest.py"
   source_license: "Apache-2.0"
 
+  category: mean_reversion
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE, new_listing]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 5000000000
-
 rules:
-  # RSI(14) in oversold territory
   - type: range
-    name: RSI Oversold
-    field: rsi14
+    indicator: rsi14
     min: 10
     max: 30
-    weight: 40
-
-  # KDJ also in oversold territory — multi-indicator confirmation
+    comment: RSI Oversold
   - type: range
-    name: KDJ Oversold
-    field: kdj_j
+    indicator: kdj_j
     min: -10
     max: 20
-    weight: 20
-
-  # Reasonable PE — not a dying business
+    comment: KDJ Oversold
   - type: range
-    name: PE Filter
-    field: pe_ttm
+    indicator: pe_ttm
     min: 5
     max: 40
-    weight: 20
-
-  # Positive ROE — quality business
+    comment: PE Filter
   - type: compare
-    name: Profitable Business
-    field: roe
+    left: roe
     operator: ">"
-    value: 5
-    weight: 20
-
+    right: 5
+    comment: Profitable Business
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 50
-
+  rule_points:
+    - points: 40
+    - points: 20
+    - points: 20
+    - points: 20
 exit_rules:
-  stop_loss: 0.05
-  take_profit: 0.12
+  stop_loss_pct: 5.0
+  take_profit_pct: 12.0
   max_holding_days: 15
-
 portfolio:
   method: equal_weight
   max_positions: 15

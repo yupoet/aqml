@@ -13,8 +13,7 @@
 #    volume surge detection as proxies.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Smart Money Flow
 description: >
   ⚠️ Approximation of the Smart Money Factor 2.0 model from
@@ -25,13 +24,13 @@ description: >
   This version uses OBV + volume anomaly + MFI as proxies.
   ⚠️ 开源证券聪明钱因子 2.0 模型的近似版本。原策略用分钟数据的
   价格冲击信号识别机构交易；本版本使用 OBV + 量能异动 + MFI 近似。
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 50.0
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [smart-money, flow, institutional, obv, approximation]
-  category: momentum
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/B-因子构建类/聪明钱因子模型的2.0版本"
   original_file: "notebook/聪明钱因子模型的 2.0 版本.ipynb"
   reference_paper: "《20200209-开源证券-市场微观结构研究系列（3）：聪明钱因子模型的2.0版本》"
@@ -43,64 +42,44 @@ metadata:
     The original uses minute-level S_t for smart money identification.
     This version uses OBV + volume surge + MFI as fund flow proxies.
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 5000000000
-
 rules:
-  # MFI above 50 — net money inflow
   - type: compare
-    name: MFI Positive Inflow
-    field: mfi14
+    left: mfi
     operator: ">"
-    value: 50
-    weight: 30
-    # APPROX: 原策略使用 VWAP_smart / VWAP_all > 1 (Q因子)
-    # Original uses smart money VWAP ratio > 1
-    # MFI > 50 indicates net positive money flow
-
-  # Volume surge — institutional activity
+    right: 50
+    comment: MFI Positive Inflow
   - type: compare
-    name: Volume Surge
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma20
-    multiplier: 1.5
-    weight: 25
-    # APPROX: 原策略检测分钟级大单集中
-    # Original detects minute-level large order clustering
-    # Daily volume surge approximates institutional participation
-
-  # Price above EMA10 — smart money drives price up
+    right: volume_ma20
+    right_multiplier: 1.5
+    comment: Volume Surge
   - type: compare
-    name: Price Above Short EMA
-    field: close
+    left: close
     operator: ">"
-    reference: ema10
-    weight: 25
-
-  # MACD histogram positive — momentum confirmation
+    right: ema10
+    comment: Price Above Short EMA
   - type: compare
-    name: MACD Positive
-    field: macd_hist
+    left: macd_hist
     operator: ">"
-    value: 0
-    weight: 20
-
+    right: 0
+    comment: MACD Positive
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 55
-
+  rule_points:
+    - points: 30
+    - points: 25
+    - points: 25
+    - points: 20
 exit_rules:
-  stop_loss: 0.06
-  take_profit: 0.15
+  stop_loss_pct: 6.0
+  take_profit_pct: 15.0
   max_holding_days: 20
-
 portfolio:
   method: score_weighted
   max_positions: 15

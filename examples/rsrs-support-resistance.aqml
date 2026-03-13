@@ -12,8 +12,7 @@
 #    This version uses SAR + DMI as support-resistance proxies.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: RSRS Support-Resistance
 description: >
   ⚠️ Approximation of the RSRS (Resistance Support Relative Strength)
@@ -25,13 +24,11 @@ description: >
   ⚠️ 光大证券 RSRS 择时模型的近似转化版本。原策略使用最高价/最低价
   的 OLS 回归斜率（β）度量支撑阻力相对强度；本版本使用 SAR 和 DMI
   作为支撑阻力的简化代理指标。
-version: "1.0.0"
-
+signal_type: buy
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [rsrs, support-resistance, timing, sar, dmi, approximation]
-  category: momentum
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/RSRS择时指标"
   original_file: "py/RSRS.ipynb"
   reference_paper: "《20170501-光大证券-择时系列报告之一：基于阻力支撑相对强度（RSRS）的市场择时》"
@@ -43,61 +40,43 @@ metadata:
     The original uses OLS regression slope of high/low (N=18, M=600).
     This version uses SAR + DMI as proxy indicators.
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-
 rules:
-  # SAR below price — support holding, trend bullish
   - type: compare
-    name: SAR Support Holding
-    field: sar
+    left: sar
     operator: "<"
-    reference: close
-    weight: 35
-    # APPROX: 原策略使用 RSRS 斜率 > 阈值判断支撑强于阻力
-    # Original uses RSRS slope > threshold for support > resistance
-    # SAR is used here as a simpler support/resistance proxy
-
-  # DMI+ > DMI- — bullish directional movement
+    right: close
+    comment: SAR Support Holding
   - type: compare
-    name: DMI Bullish Momentum
-    field: dmi_plus
+    left: dmi_plus
     operator: ">"
-    reference: dmi_minus
-    weight: 30
-    # APPROX: 原策略使用 RSRS 标准分 > 0.7
-    # Original uses RSRS z-score > 0.7
-    # DMI directional strength serves as approximate momentum filter
-
-  # ADX > 20 — meaningful trend (not noise)
+    right: dmi_minus
+    comment: DMI Bullish Momentum
   - type: compare
-    name: Trend Strength
-    field: dmi_adx
+    left: dmi_adx
     operator: ">"
-    value: 20
-    weight: 20
-    # APPROX: 原策略使用 R² 权重过滤弱信号
-    # Original uses R² weighting to filter weak signals
-    # ADX > 20 filters noise similarly
-
-  # Close above MA20 — basic trend confirmation
+    right: 20
+    comment: Trend Strength
   - type: compare
-    name: Above MA20
-    field: close
+    left: close
     operator: ">"
-    reference: ma20
-    weight: 15
-
+    right: ma20
+    comment: Above MA20
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 35
+    - points: 30
+    - points: 20
+    - points: 15
 exit_rules:
-  stop_loss: 0.06
-  trailing_stop: 0.10
+  stop_loss_pct: 6.0
+  trailing_stop_pct: 10.0
   max_holding_days: 25
-
 portfolio:
   method: equal_weight
   max_positions: 10

@@ -4,8 +4,7 @@
 # Source: hugo2046/QuantsPlaybook (华创证券研报复现)
 # ================================================================
 
-aqml: "1.0"
-
+version: "2.0"
 name: Volume-Price Resonance
 description: >
   Derived from Huachuang Securities research on alternative volume-price
@@ -14,74 +13,60 @@ description: >
   "resonate" to produce a higher-conviction signal. This AQML adaptation
   screens for stocks where both price and volume confirm each other.
   价格突破与成交量放大同时出现时形成"共振"，信号可靠性更高。
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 30.0
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [volume, price-volume, resonance, breakout, timing]
-  category: momentum
   source: "hugo2046/QuantsPlaybook/C-择时类/成交量的奥秘_另类价量共振指标的择时"
   source_license: "Unlicensed"
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 3000000000
-
 rules:
-  # Price breaks above MA20 — price dimension breakout
   - type: compare
-    name: Price Breakout
-    field: close
+    left: close
     operator: ">"
-    reference: ma20
-    multiplier: 1.02
-    weight: 30
-
-  # Volume at least 2x of 20-day average — volume dimension surge
+    right: ma20
+    right_multiplier: 1.02
+    comment: Price Breakout
   - type: compare
-    name: Volume Surge
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma20
-    multiplier: 2.0
-    weight: 30
-
-  # OBV trending up — accumulation
+    right: volume_ma20
+    right_multiplier: 2.0
+    comment: Volume Surge
   - type: compare
-    name: OBV Rising
-    field: obv
+    left: obv
     operator: ">"
-    value: 0
-    weight: 20
-
-  # MACD histogram positive — momentum confirmation
+    right: 0
+    comment: OBV Rising
   - type: compare
-    name: MACD Positive
-    field: macd_hist
+    left: macd_hist
     operator: ">"
-    value: 0
-    weight: 20
-
+    right: 0
+    comment: MACD Positive
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 30
+    - points: 30
+    - points: 20
+    - points: 20
 exit_rules:
-  stop_loss: 0.05
-  take_profit: 0.12
-  trailing_stop: 0.08
+  stop_loss_pct: 5.0
+  take_profit_pct: 12.0
+  trailing_stop_pct: 8.0
   max_holding_days: 15
-
 portfolio:
   method: equal_weight
   max_positions: 10
 
 risk:
-  max_drawdown: 0.12
-  max_single_position: 0.10
+  max_drawdown: 12.0
+  max_single_position: 10.0

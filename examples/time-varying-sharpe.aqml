@@ -14,8 +14,7 @@
 #    as risk-adjusted return proxy.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Time-Varying Sharpe
 description: >
   ⚠️ Approximation of the Time-Varying Sharpe Ratio timing model
@@ -28,13 +27,13 @@ description: >
   ⚠️ 开源证券时变夏普率择时的近似版本。原策略使用宏观变量（M1、PE、
   利率、储蓄率）通过滚动回归预测月度夏普率，买入阈值 0.48，卖出 0.24。
   本版本使用 RSI 适中 + ATR 可控 + 趋势向好作为风险调整收益的代理。
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 50.0
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [sharpe, timing, risk-adjusted, rsi, atr, macro, approximation]
-  category: momentum
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/时变夏普"
   original_file: "py/Tsharpe.ipynb"
   reference_paper: "Whitelaw (1994/1997) Time-Varying Sharpe Ratios"
@@ -49,70 +48,43 @@ metadata:
     The original uses macro-predicted monthly Sharpe ratio.
     This version uses RSI range + trend + PE as Sharpe proxy.
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 5000000000
-
 rules:
-  # RSI in favorable range — positive return, not overheated
   - type: range
-    name: Favorable Return Zone
-    field: rsi14
+    indicator: rsi14
     min: 45
     max: 65
-    weight: 30
-    # APPROX: 原策略的高夏普率预测区间
-    # Original predicts high Sharpe ratio state
-    # RSI 45-65 captures positive momentum without overextension
-    # (high return/risk ratio zone)
-
-  # Close above MA60 — long-term positive excess return
+    comment: Favorable Return Zone
   - type: compare
-    name: Positive Trend
-    field: close
+    left: close
     operator: ">"
-    reference: ma60
-    weight: 25
-    # APPROX: 原策略的正超额收益预测
-    # Original predicts positive excess return (R - Rf)
-    # Price above long MA indicates sustained positive returns
-
-  # MACD histogram positive — momentum confirmation
+    right: ma60
+    comment: Positive Trend
   - type: compare
-    name: Momentum Positive
-    field: macd_hist
+    left: macd_hist
     operator: ">"
-    value: 0
-    weight: 25
-    # APPROX: 原策略的 M1 增速信号
-    # Original uses M1 growth as momentum proxy
-    # MACD positive confirms current momentum direction
-
-  # PE_TTM reasonable — valuation factor proxy
+    right: 0
+    comment: Momentum Positive
   - type: compare
-    name: Reasonable Valuation
-    field: pe_ttm
+    left: pe_ttm
     operator: "<"
-    value: 30
-    weight: 20
-    # APPROX: 原策略直接使用 PE_TTM 作为宏观因子之一
-    # Original uses PE_TTM as one of the macro variables
-    # PE < 30 filters out overvalued stocks
-
+    right: 30
+    comment: Reasonable Valuation
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 30
+    - points: 25
+    - points: 25
+    - points: 20
 exit_rules:
-  stop_loss: 0.06
-  trailing_stop: 0.08
+  stop_loss_pct: 6.0
+  trailing_stop_pct: 8.0
   max_holding_days: 30
-
 portfolio:
   method: equal_weight
   max_positions: 10

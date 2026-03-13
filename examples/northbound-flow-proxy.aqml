@@ -13,8 +13,7 @@
 #    alignment as a proxy for institutional flow behavior.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Northbound Flow Proxy
 description: >
   ⚠️ Approximation of the Northbound Capital Flow timing model
@@ -27,13 +26,13 @@ description: >
   ⚠️ 华泰证券北向资金择时模型的近似版本。原策略使用沪深港通北向资金
   净流入数据构建 EMA 动量指标，通过滚动超参优化阈值进行择时。
   本版本使用量能放大 + MFI + 均线趋势作为机构资金流入的代理信号。
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 100.0
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [northbound, flow, institutional, mfi, volume, approximation]
-  category: momentum
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/C-择时类/北向资金交易能力一定强吗"
   original_file: "py/北向资金交易能力一定强吗.ipynb"
   reference_paper: "《华泰证券-北向资金交易能力一定强吗》"
@@ -48,68 +47,44 @@ metadata:
     The original uses actual HKEX northbound flow data.
     This version uses MFI + volume surge as institutional proxy.
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-  filters:
-    # Northbound capital concentrates in large-cap blue chips
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 10000000000
-
 rules:
-  # MFI above 55 — net money inflow proxy
   - type: compare
-    name: Money Inflow Signal
-    field: mfi14
+    left: mfi
     operator: ">"
-    value: 55
-    weight: 30
-    # APPROX: 原策略使用北向净流入 > 阈值
-    # Original uses northbound net flow > threshold
-    # MFI > 55 approximates positive net capital inflow
-
-  # Volume above 1.3x MA20 — institutional participation
+    right: 55
+    comment: Money Inflow Signal
   - type: compare
-    name: Institutional Volume
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma20
-    multiplier: 1.3
-    weight: 25
-    # APPROX: 原策略的 EMA(flow) 动量上升
-    # Original uses EMA momentum of capital flow
-    # Volume expansion at large caps indicates institutional activity
-
-  # EMA20 above EMA60 — trend alignment
+    right: volume_ma20
+    right_multiplier: 1.3
+    comment: Institutional Volume
   - type: compare
-    name: Trend Alignment
-    field: ema20
+    left: ema20
     operator: ">"
-    reference: ema60
-    weight: 25
-    # APPROX: 原策略的 flow indicator 方向
-    # Original flow indicator direction
-    # Medium-term trend captures the market regime northbound follows
-
-  # Close above MA20 — price confirmation
+    right: ema60
+    comment: Trend Alignment
   - type: compare
-    name: Price Confirmation
-    field: close
+    left: close
     operator: ">"
-    reference: ma20
-    weight: 20
-
+    right: ma20
+    comment: Price Confirmation
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 30
+    - points: 25
+    - points: 25
+    - points: 20
 exit_rules:
-  stop_loss: 0.06
-  trailing_stop: 0.08
+  stop_loss_pct: 6.0
+  trailing_stop_pct: 8.0
   max_holding_days: 25
-
 portfolio:
   method: equal_weight
   max_positions: 10

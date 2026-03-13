@@ -1,6 +1,12 @@
 # AQML Strategy Examples
 
-This directory contains reference strategies demonstrating various AQML patterns.
+This directory contains reference strategies demonstrating the current AQML v2 executable profile.
+
+All files in this directory are synced to:
+
+- [`../spec/aqml-v2.0.md`](../spec/aqml-v2.0.md)
+- [`../spec/schema.json`](../spec/schema.json)
+- the current AurumQ parser and evaluator semantics
 
 ## Original Examples
 
@@ -65,7 +71,7 @@ These strategies use **simplified standard-indicator proxies** for models that o
 
 ## Strategies Not Converted
 
-The following strategies from the reference repositories were **not converted** because they fall outside AQML v1.0 scope even with approximation:
+The following strategies from the reference repositories were **not converted** because they still fall outside the AQML v2 executable profile even with approximation:
 
 | Strategy | Repo | Reason |
 |----------|------|--------|
@@ -83,16 +89,28 @@ The following strategies from the reference repositories were **not converted** 
 ## Validating Examples
 
 ```bash
-# Python
-pip install jsonschema pyyaml
+# JSON Schema validation
 python -c "
-import json, yaml, jsonschema, glob
+import glob, json, yaml, jsonschema
 schema = json.load(open('spec/schema.json'))
 for f in glob.glob('examples/*.aqml'):
     strategy = yaml.safe_load(open(f))
     jsonschema.validate(strategy, schema)
-    print(f'✓ {f}')
+    print(f'✓ schema {f}')
 "
+```
+
+```bash
+# AurumQ executable-profile validation
+.venv/bin/python - <<'PY'
+import glob
+from pathlib import Path
+from aurumq.strategies.service import StrategyService
+
+for f in sorted(glob.glob('examples/*.aqml')):
+    StrategyService.validate_aqml(Path(f).read_text(encoding='utf-8'))
+    print(f'✓ aurumq {f}')
+PY
 ```
 
 ## Contributing

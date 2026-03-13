@@ -4,14 +4,13 @@
 # Difficulty: ⭐ Beginner
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: KDJ Golden Cross
 description: >
   Screens for stocks where KDJ indicator shows a golden cross
   (K line crosses above D line) in oversold territory, combined
   with above-average trading volume for confirmation.
-
+signal_type: buy
 metadata:
   author: AQML Examples
   tags: [kdj, golden-cross, signal, beginner]
@@ -20,37 +19,43 @@ metadata:
 universe:
   market: A-shares
   exclude: [ST, STAR]
-
 rules:
-  # KDJ golden cross signal
-  - type: signal
-    name: KDJ Golden Cross
-    indicator: kdj
-    signal: golden_cross
-    lookback: 3
-    weight: 50
-
-  # KDJ J value in low zone (oversold)
+  - logic: or
+    comment: KDJ Golden Cross
+    conditions:
+      - type: signal
+        indicator: kdj
+        signal: golden_cross
+        offset: 0
+        comment: KDJ Golden Cross
+      - type: signal
+        indicator: kdj
+        signal: golden_cross
+        offset: -1
+        comment: KDJ Golden Cross
+      - type: signal
+        indicator: kdj
+        signal: golden_cross
+        offset: -2
+        comment: KDJ Golden Cross
   - type: range
-    name: KDJ Oversold Zone
-    field: kdj_j
+    indicator: kdj_j
     min: -10
     max: 30
-    weight: 30
-
-  # Volume above 5-day average
+    comment: KDJ Oversold Zone
   - type: compare
-    name: Active Volume
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma5
-    weight: 20
-
+    right: volume_ma5
+    comment: Active Volume
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 50
-
+  rule_points:
+    - points: 50
+    - points: 30
+    - points: 20
 exit_rules:
-  stop_loss: 0.05
-  take_profit: 0.12
+  stop_loss_pct: 5.0
+  take_profit_pct: 12.0
   max_holding_days: 10

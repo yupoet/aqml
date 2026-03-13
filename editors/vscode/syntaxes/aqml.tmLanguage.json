@@ -12,7 +12,7 @@
     { "include": "#indicators" },
     { "include": "#signals" },
     { "include": "#patterns-candle" },
-    { "include": "#scoring-modes" },
+    { "include": "#scoring-terms" },
     { "include": "#portfolio-methods" },
     { "include": "#universe-labels" },
     { "include": "#strings" },
@@ -34,13 +34,13 @@
       }
     },
     "top-level-keys": {
-      "match": "^(name|description|version|metadata|universe|rules|scoring|exit_rules|portfolio|risk):",
+      "match": "^(name|description|version|signal_type|filters|metadata|universe|rules|scoring|exit_rules|portfolio|risk):",
       "captures": {
         "1": { "name": "keyword.control.aqml.section" }
       }
     },
     "rule-types": {
-      "match": "\\b(compare|range|signal|pattern|breakout)\\b",
+      "match": "\\b(compare|compare_all|range|signal|pattern|breakout|and|or|not)\\b",
       "name": "entity.name.type.rule.aqml"
     },
     "operators": {
@@ -48,7 +48,7 @@
       "name": "keyword.operator.comparison.aqml"
     },
     "indicators": {
-      "match": "\\b(ma\\d+|ema\\d+|macd_dif|macd_dea|macd_hist|macd|rsi\\d+|rsi|kdj_k|kdj_d|kdj_j|kdj|boll_upper|boll_mid|boll_lower|boll|atr\\d*|cci\\d*|obv|dmi_plus|dmi_minus|dmi_adx|dmi|sar|supertrend|mfi\\d*|wr\\d*|volume_ma\\d+|close|open|high|low|volume|pe_ttm|pb|roe|total_mv)\\b",
+      "match": "\\b(ma\\d+|ema\\d+|macd_dif|macd_dea|macd_signal|macd_hist|macd|rsi\\d+|rsi|kdj_k|kdj_d|kdj_j|kdj|boll_upper|boll_mid|boll_middle|boll_lower|boll|atr\\d*|atr_percent|cci\\d*|cci|obv|obv_change|dmi_plus|dmi_minus|dmi_pdi|dmi_mdi|dmi_adx|dmi|sar|supertrend|supertrend_direction|mfi\\d*|mfi|wr\\d*|wr|vol_ma\\d+|volume_ma\\d+|volume_ratio|volume_amplify|close|open|high|low|volume|amount|pe_ttm|pe|pb|ps|roe|eps|total_mv|market_cap|turnover|turnover_rate|fi_roe|np_yoy|revenue_growth)\\b",
       "name": "variable.other.indicator.aqml"
     },
     "signals": {
@@ -59,16 +59,16 @@
       "match": "\\b(hammer|engulfing_bull|engulfing_bear|doji|morning_star|evening_star|three_white_soldiers|three_black_crows)\\b",
       "name": "constant.language.pattern.aqml"
     },
-    "scoring-modes": {
-      "match": "\\b(weighted|equal|threshold)\\b",
+    "scoring-terms": {
+      "match": "\\b(max_score|min_score|rule_points|tiers|volume_bonus|points|required)\\b",
       "name": "support.constant.scoring.aqml"
     },
     "portfolio-methods": {
-      "match": "\\b(equal_weight|score_weighted|market_cap_weighted|kelly|risk_parity)\\b",
+      "match": "\\b(equal_weight|score_weighted)\\b",
       "name": "support.constant.portfolio.aqml"
     },
     "universe-labels": {
-      "match": "\\b(A-shares|A-shares-main|custom|ST|STAR|BSE|ChiNext|new_listing)\\b",
+      "match": "\\b(A-shares|A-shares-main|custom|ST|STAR|BSE|ChiNext|new_listing|buy|sell|up|down)\\b",
       "name": "constant.language.universe.aqml"
     },
     "strings": {

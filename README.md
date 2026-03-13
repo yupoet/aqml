@@ -6,20 +6,20 @@
 <p align="center"><strong>Aurum Quant Markup Language</strong></p>
 
 <p align="center">
-  The world's first AI-native declarative standard for quantitative trading strategies.
+  The executable YAML profile for quantitative trading strategies on AurumQ.
 </p>
 
 <p align="center">
-  <a href="spec/aqml-v1.0.md">Specification</a> ·
+  <a href="spec/aqml-v2.0.md">Specification</a> ·
   <a href="examples/">Examples</a> ·
   <a href="docs/">Documentation</a> ·
   <a href="https://aurumq.ai">AurumQ Platform</a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0--draft-D4A853?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-2.0--draft-D4A853?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/format-YAML-blue?style=flat-square" alt="Format" />
-  <img src="https://img.shields.io/badge/AI--native-✓-4ECDC4?style=flat-square" alt="AI Native" />
+  <img src="https://img.shields.io/badge/executable-profile-aurumq-4ECDC4?style=flat-square" alt="Executable Profile" />
   <img src="https://img.shields.io/badge/license-Apache--2.0-green?style=flat-square" alt="License" />
 </p>
 
@@ -27,101 +27,123 @@
 
 ## What is AQML?
 
-**AQML** (Aurum Quant Markup Language) is a declarative, YAML-based specification for defining quantitative trading strategies. It is designed to be:
+**AQML** (Aurum Quant Markup Language) is a declarative, YAML-based format for defining quantitative strategies. This repository tracks the **AQML v2 executable profile** that AurumQ currently parses, validates, backtests, and runs in production.
 
-- **Human-readable** — Write and review strategies like reading a document
-- **Machine-parseable** — Validate, execute, and backtest with any conformant engine
-- **AI-generatable** — LLMs can natively read, write, and optimize AQML strategies
+AQML is designed to be:
 
-AQML eliminates the need to write Python, C++, or any programming language to define trading logic. Describe *what* conditions to screen for, not *how* to implement them.
+- **Human-readable**: strategies read like structured investment notes
+- **Machine-parseable**: the same document can be validated and executed
+- **AI-generatable**: LLMs can reliably produce and revise valid strategy files
 
 ## Quick Example
 
 ```yaml
 # momentum-breakout.aqml
-aqml: "1.0"
+version: "2.0"
 
 name: Momentum Breakout Strategy
 description: "RSI oversold + MACD golden cross with volume confirmation"
+signal_type: buy
 
-universe:
-  market: A-shares
-  exclude: [ST, STAR, BSE]
+filters:
+  exclude_st: true
+  exclude_kcb: true
+  exclude_bj: true
 
 rules:
-  - type: compare
-    field: rsi14
-    operator: "<"
-    value: 30
-    weight: 40
+  - type: range
+    indicator: rsi14
+    min: 0
+    max: 30
+    comment: "RSI in oversold zone"
 
-  - type: signal
-    indicator: macd
-    signal: golden_cross
-    weight: 35
+  - logic: or
+    comment: "MACD golden cross within 3 bars"
+    conditions:
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: 0
+        comment: "MACD golden cross today"
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: -1
+        comment: "MACD golden cross yesterday"
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: -2
+        comment: "MACD golden cross 2 bars ago"
 
   - type: compare
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma10
-    multiplier: 1.5
-    weight: 25
+    right: volume_ma10
+    right_multiplier: 1.5
+    comment: "Volume above 10-day average"
 
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
+  rule_points:
+    - points: 40
+    - points: 35
+    - points: 25
 
 exit_rules:
-  stop_loss: 0.05
-  take_profit: 0.15
+  stop_loss_pct: 5.0
+  take_profit_pct: 15.0
   max_holding_days: 20
 
 portfolio:
   method: score_weighted
   max_positions: 10
-  max_sector_pct: 0.3
+  initial_capital: 1000000
 
 risk:
-  max_drawdown: 0.15
-  max_single_position: 0.1
+  max_drawdown: 15.0
+  max_single_position: 10.0
 ```
-
-## Why AQML?
-
-| Feature | AQML | Python-based (Qlib, VN.py, LEAN) |
-|---------|------|-----------------------------------|
-| Learning curve | Minutes | Weeks to months |
-| AI generation | Native — LLMs output valid AQML directly | Fragile — generated code often has bugs |
-| Readability | Plain YAML, self-documenting | Requires reading source code |
-| Validation | JSON Schema, instant feedback | Runtime errors only |
-| Version control | Clean diffs, meaningful commits | Noisy code diffs |
-| Portability | Engine-agnostic specification | Locked to specific framework |
-| Collaboration | Non-developers can review & contribute | Developer-only |
 
 ## Specification
 
-The full AQML v1.0 specification is available at [`spec/aqml-v1.0.md`](spec/aqml-v1.0.md).
+The active executable specification is [`spec/aqml-v2.0.md`](spec/aqml-v2.0.md).
 
 ### Core Concepts
 
 | Concept | Description |
 |---------|-------------|
-| **Universe** | Define which stocks to screen (market, exclusions, filters) |
-| **Rules** | Declarative conditions using 5+ rule types |
-| **Scoring** | Optional weighted scoring mode for ranking candidates |
-| **Exit Rules** | Stop-loss, take-profit, trailing stop, time-based exits |
-| **Portfolio** | Position sizing, allocation method, concentration limits |
-| **Risk** | Pre-trade and post-trade risk parameters |
+| **Filters** | Exclude ST/KCB/BJ stocks, enforce liquidity and market-cap gates |
+| **Rules** | Declarative conditions with nested `and/or/not` logic groups |
+| **Scoring** | Ranked selection via `rule_points`, `tiers`, and optional bonuses |
+| **Exit Rules** | Percentage-based stop-loss, take-profit, trailing stop, time exits |
+| **Portfolio** | Position sizing and allocation method |
+| **Risk** | Portfolio-level risk guards |
 
 ### Rule Types
 
 | Type | Description | Example |
 |------|-------------|---------|
-| `compare` | Compare field against value or reference | `rsi14 < 30` |
-| `range` | Check if field is within a range | `pe_ttm between 5 and 25` |
-| `signal` | Technical indicator signal detection | `macd golden_cross` |
-| `pattern` | Candlestick or price pattern matching | `hammer pattern` |
-| `breakout` | Price/volume breakout detection | `close > boll_upper` |
+| `compare` | Compare `left` against `right` with optional offsets/multipliers | `close > ma20` |
+| `compare_all` | Ensure price is above or below multiple indicators | `close > ma60/90/125/250` |
+| `range` | Check whether an indicator falls within a range | `pe_ttm between 5 and 25` |
+| `signal` | Detect technical events on boolean signal columns | `MACD golden_cross` |
+| `pattern` | Match candlestick patterns | `hammer pattern` |
+| `breakout` | Detect cross-through against a level | `close breaks up through boll_upper` |
+| `logic group` | Compose conditions with `and`, `or`, `not` | `or: [MACD, KDJ]` |
+
+### Migration Highlights
+
+| Old form | Executable v2 form |
+|----------|--------------------|
+| `field` / `value` / `reference` / `multiplier` | `left` / `right` / `right_multiplier` |
+| `range.field` | `range.indicator` |
+| `breakout.field` / `breakout.reference` | `breakout.price` / `breakout.level` |
+| `direction: above|below` | `direction: up|down` |
+| `lookback` | explicit `offset` or an `or` logic group |
+| `weight + scoring.mode` | `scoring.rule_points` |
+| `stop_loss`, `take_profit`, `trailing_stop` | `*_pct` percentage fields |
 
 ## File Extension
 
@@ -136,11 +158,11 @@ strategies/
 
 The `.aqml` extension establishes AQML as a first-class file format with dedicated IDE support, syntax highlighting, and validation tooling.
 
-### IDE Support
+## IDE Support
 
 | IDE | Support | Install |
 |-----|---------|---------|
-| **VS Code** | Syntax highlighting + validation | [Extension](editors/vscode/) |
+| **VS Code** | Syntax highlighting + snippets | [Extension](editors/vscode/) |
 | **JetBrains** | File type recognition + highlighting | [Plugin](editors/jetbrains/) |
 | **Vim / Neovim** | Filetype detection + YAML highlighting | [Config](editors/vim/) |
 | **GitHub** | Syntax highlighting in repos | Automatic via `.gitattributes` |
@@ -151,50 +173,37 @@ The `.aqml` extension establishes AQML as a first-class file format with dedicat
 
 [AurumQ](https://aurumq.ai) is the reference implementation and execution engine for AQML strategies, providing:
 
-- Full AQML v1.0 parser and validator
-- 17+ built-in technical indicators
-- Institutional-grade backtesting engine
+- Full AQML v2 executable-profile parser and validator
+- Nested rule groups, `compare_all`, tiered scoring, and percentage-based exits
+- Backtesting and scheduled execution for A-share screening strategies
 - AI-powered strategy generation (natural language → AQML)
-- Real-time signal tracking across 4,800+ A-shares
 
 ### Validator
 
-```bash
-pip install aqml-validator  # coming soon
-```
-
-```python
-from aqml import validate
-
-result = validate("my-strategy.aqml")
-if result.valid:
-    print("✓ Valid AQML strategy")
-else:
-    for error in result.errors:
-        print(f"✗ {error}")
-```
+JSON Schema is provided at [`spec/schema.json`](spec/schema.json). Example strategies in [`examples/`](examples/) are synced to that schema and to the current AurumQ evaluator semantics.
 
 ## Roadmap
 
-- [x] AQML v1.0 specification draft
+- [x] AQML v2 executable-profile draft
 - [x] JSON Schema for validation
-- [x] Example strategy library
+- [x] Example strategy library synced to the executable parser
+- [x] Nested logic groups, `compare_all`, and tiered scoring
 - [ ] Python validator package (`aqml-validator`)
-- [ ] VS Code extension (syntax highlighting + validation)
+- [ ] VS Code extension packaging
 - [ ] Strategy template gallery
 - [ ] Multi-language validator (JavaScript, Go)
-- [ ] AQML v2.0 — nested logic groups, OR/NOT operators
+- [ ] AQML v3.0: multi-asset strategies and custom factor expressions
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-Ways to contribute:
-- 📝 Submit strategy examples
-- 🐛 Report spec ambiguities or issues
-- 🔧 Build validators or tooling
-- 🌐 Translate documentation
-- 💡 Propose spec extensions via RFC
+Useful contributions include:
+
+- strategy examples aligned with the executable profile
+- spec clarifications and migration notes
+- editor tooling and validators
+- translations and docs improvements
 
 ## License
 

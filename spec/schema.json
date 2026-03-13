@@ -1,50 +1,350 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://aqml.dev/schema/v1.0/aqml.json",
+  "$id": "https://aqml.dev/schema/v2.0/aqml.json",
   "title": "AQML Strategy",
-  "description": "Aurum Quant Markup Language v1.0 — Declarative quantitative strategy specification",
+  "description": "AQML v2 executable profile aligned with the AurumQ parser and evaluator",
   "type": "object",
-  "required": ["aqml", "name", "rules"],
+  "required": ["version", "name", "description", "signal_type", "rules"],
+  "additionalProperties": false,
   "properties": {
-    "aqml": {
+    "version": {
       "type": "string",
-      "enum": ["1.0"],
-      "description": "AQML specification version"
+      "enum": ["2.0"],
+      "description": "AQML executable profile version"
     },
     "name": {
       "type": "string",
-      "minLength": 1,
-      "description": "Strategy name"
+      "minLength": 1
     },
     "description": {
       "type": "string",
-      "description": "Human-readable strategy description"
+      "minLength": 1
     },
-    "version": {
+    "signal_type": {
       "type": "string",
-      "description": "User-defined strategy version"
+      "enum": ["buy", "sell"]
+    },
+    "filters": {
+      "$ref": "#/definitions/filters"
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/definitions/rule_item"
+      }
+    },
+    "scoring": {
+      "$ref": "#/definitions/scoring"
+    },
+    "exit_rules": {
+      "$ref": "#/definitions/exit_rules"
+    },
+    "risk": {
+      "$ref": "#/definitions/risk"
+    },
+    "portfolio": {
+      "$ref": "#/definitions/portfolio"
+    },
+    "universe": {
+      "$ref": "#/definitions/universe"
     },
     "metadata": {
+      "$ref": "#/definitions/metadata"
+    }
+  },
+  "definitions": {
+    "operand": {
+      "anyOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "number" }
+      ]
+    },
+    "rule_item": {
+      "oneOf": [
+        { "$ref": "#/definitions/rule_group" },
+        { "$ref": "#/definitions/compare_rule" },
+        { "$ref": "#/definitions/compare_all_rule" },
+        { "$ref": "#/definitions/signal_rule" },
+        { "$ref": "#/definitions/range_rule" },
+        { "$ref": "#/definitions/pattern_rule" },
+        { "$ref": "#/definitions/breakout_rule" }
+      ]
+    },
+    "rule_group": {
       "type": "object",
+      "required": ["logic", "comment", "conditions"],
+      "additionalProperties": false,
       "properties": {
-        "author": { "type": "string" },
-        "created_at": { "type": "string", "format": "date" },
-        "tags": { "type": "array", "items": { "type": "string" } },
-        "category": {
+        "logic": {
           "type": "string",
-          "enum": ["momentum", "value", "mean-reversion", "breakout", "fundamental", "composite", "custom"]
+          "enum": ["and", "or", "not"]
         },
-        "source": { "type": "string" }
+        "comment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/rule_item"
+          }
+        }
+      }
+    },
+    "compare_rule": {
+      "type": "object",
+      "required": ["type", "left", "operator", "right", "comment"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "compare" },
+        "left": { "$ref": "#/definitions/operand" },
+        "operator": {
+          "type": "string",
+          "enum": [">", ">=", "<", "<=", "==", "!="]
+        },
+        "right": { "$ref": "#/definitions/operand" },
+        "left_offset": { "type": "integer" },
+        "left_multiplier": { "type": "number" },
+        "right_offset": { "type": "integer" },
+        "right_multiplier": { "type": "number" },
+        "comment": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" }
+      }
+    },
+    "compare_all_rule": {
+      "type": "object",
+      "required": ["type", "price", "indicators", "operator", "comment"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "compare_all" },
+        "price": { "type": "string", "minLength": 1 },
+        "indicators": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "operator": {
+          "type": "string",
+          "enum": [">", ">=", "<", "<=", "==", "!="]
+        },
+        "min_above_pct": { "type": "number" },
+        "max_above_pct": { "type": "number" },
+        "comment": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" }
+      }
+    },
+    "signal_rule": {
+      "type": "object",
+      "required": ["type", "indicator", "signal", "comment"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "signal" },
+        "indicator": { "type": "string", "minLength": 1 },
+        "signal": { "type": "string", "minLength": 1 },
+        "offset": { "type": "integer" },
+        "comment": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" }
+      }
+    },
+    "range_rule": {
+      "type": "object",
+      "required": ["type", "indicator", "comment"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "range" },
+        "indicator": { "type": "string", "minLength": 1 },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "comment": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" }
       },
-      "additionalProperties": true
+      "anyOf": [
+        { "required": ["min"] },
+        { "required": ["max"] }
+      ]
+    },
+    "pattern_rule": {
+      "type": "object",
+      "required": ["type", "pattern", "comment"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "pattern" },
+        "pattern": {
+          "anyOf": [
+            { "type": "string", "minLength": 1 },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          ]
+        },
+        "offset": { "type": "integer" },
+        "comment": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" }
+      }
+    },
+    "breakout_rule": {
+      "type": "object",
+      "required": ["type", "price", "level", "direction", "comment"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "breakout" },
+        "price": { "type": "string", "minLength": 1 },
+        "level": { "$ref": "#/definitions/operand" },
+        "direction": {
+          "type": "string",
+          "enum": ["up", "down"]
+        },
+        "offset": { "type": "integer" },
+        "comment": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" }
+      }
+    },
+    "filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "exclude_st": { "type": "boolean" },
+        "exclude_kcb": { "type": "boolean" },
+        "exclude_cyb": { "type": "boolean" },
+        "exclude_bj": { "type": "boolean" },
+        "min_amount": { "type": "number", "minimum": 0 },
+        "min_market_cap": { "type": "number", "minimum": 0 },
+        "include_industries": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "exclude_limit_up": { "type": "boolean" },
+        "exclude_limit_down": { "type": "boolean" }
+      }
+    },
+    "tier_condition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["left", "operator", "right"],
+          "additionalProperties": false,
+          "properties": {
+            "left": { "$ref": "#/definitions/operand" },
+            "operator": {
+              "type": "string",
+              "enum": [">", ">=", "<", "<=", "==", "!="]
+            },
+            "right": { "$ref": "#/definitions/operand" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["indicator"],
+          "additionalProperties": false,
+          "properties": {
+            "indicator": { "type": "string", "minLength": 1 },
+            "min": { "type": "number" },
+            "max": { "type": "number" }
+          },
+          "anyOf": [
+            { "required": ["min"] },
+            { "required": ["max"] }
+          ]
+        }
+      ]
+    },
+    "tier": {
+      "type": "object",
+      "required": ["condition", "points"],
+      "additionalProperties": false,
+      "properties": {
+        "condition": { "$ref": "#/definitions/tier_condition" },
+        "points": { "type": "number" }
+      }
+    },
+    "rule_point": {
+      "type": "object",
+      "required": ["points"],
+      "additionalProperties": false,
+      "properties": {
+        "points": { "type": "number" },
+        "required": { "type": "boolean" },
+        "tiers": {
+          "type": "array",
+          "maxItems": 10,
+          "items": { "$ref": "#/definitions/tier" }
+        }
+      }
+    },
+    "scoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_score": { "type": "number", "minimum": 0 },
+        "min_score": { "type": "number", "minimum": 0 },
+        "rule_points": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/rule_point" }
+        },
+        "volume_bonus": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "column": { "type": "string", "minLength": 1 },
+            "lookback": { "type": "integer", "minimum": 1 },
+            "multiplier": { "type": "number", "minimum": 0 },
+            "points": { "type": "number" }
+          }
+        }
+      }
+    },
+    "exit_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stop_loss_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "take_profit_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "trailing_stop_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "max_holding_days": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_drawdown": { "type": "number", "minimum": 0, "maximum": 100 },
+        "max_single_position": { "type": "number", "minimum": 0, "maximum": 100 },
+        "max_sector_concentration": { "type": "number", "minimum": 0 },
+        "var_limit": { "type": "number", "minimum": 0 },
+        "correlation_threshold": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "portfolio": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["equal_weight", "score_weighted"]
+        },
+        "max_positions": { "type": "integer", "minimum": 1 },
+        "initial_capital": { "type": "number", "minimum": 0 },
+        "max_sector_pct": { "type": "number", "minimum": 0 },
+        "rebalance": {
+          "type": "string",
+          "enum": ["daily", "weekly", "biweekly", "monthly"]
+        }
+      }
     },
     "universe": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "market": {
           "type": "string",
-          "enum": ["A-shares", "A-shares-main", "custom"],
-          "default": "A-shares"
+          "enum": ["A-shares", "A-shares-main", "custom"]
         },
         "exclude": {
           "type": "array",
@@ -53,95 +353,27 @@
             "enum": ["ST", "STAR", "BSE", "ChiNext", "new_listing"]
           }
         },
-        "filters": {
+        "include_boards": {
           "type": "array",
-          "items": { "$ref": "#/definitions/rule" }
+          "items": { "type": "string", "minLength": 1 }
         }
       }
     },
-    "rules": {
-      "type": "array",
-      "minItems": 1,
-      "items": { "$ref": "#/definitions/rule" },
-      "description": "Entry conditions — at least one rule required"
-    },
-    "scoring": {
+    "metadata": {
       "type": "object",
+      "additionalProperties": true,
       "properties": {
-        "mode": {
-          "type": "string",
-          "enum": ["weighted", "equal", "threshold"],
-          "default": "weighted"
+        "author": { "type": "string" },
+        "created_at": { "type": "string", "format": "date" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
         },
-        "min_score": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 100,
-          "default": 60
-        }
-      }
-    },
-    "exit_rules": {
-      "type": "object",
-      "properties": {
-        "stop_loss": { "type": "number", "minimum": 0, "maximum": 1 },
-        "take_profit": { "type": "number", "minimum": 0 },
-        "trailing_stop": { "type": "number", "minimum": 0, "maximum": 1 },
-        "max_holding_days": { "type": "integer", "minimum": 1 }
-      }
-    },
-    "portfolio": {
-      "type": "object",
-      "properties": {
-        "method": {
-          "type": "string",
-          "enum": ["equal_weight", "score_weighted", "market_cap_weighted", "kelly", "risk_parity"]
-        },
-        "max_positions": { "type": "integer", "minimum": 1 },
-        "max_sector_pct": { "type": "number", "minimum": 0, "maximum": 1 },
-        "rebalance": {
-          "type": "string",
-          "enum": ["daily", "weekly", "biweekly", "monthly"]
-        }
-      }
-    },
-    "risk": {
-      "type": "object",
-      "properties": {
-        "max_drawdown": { "type": "number", "minimum": 0, "maximum": 1 },
-        "max_single_position": { "type": "number", "minimum": 0, "maximum": 1 },
-        "max_sector_concentration": { "type": "number", "minimum": 0, "maximum": 1 },
-        "var_limit": { "type": "number", "minimum": 0, "maximum": 1 },
-        "correlation_threshold": { "type": "number", "minimum": 0, "maximum": 1 }
-      }
-    }
-  },
-  "definitions": {
-    "rule": {
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["compare", "range", "signal", "pattern", "breakout"]
-        },
-        "weight": { "type": "number", "minimum": 0, "maximum": 100 },
-        "name": { "type": "string" },
-        "enabled": { "type": "boolean", "default": true },
-        "field": { "type": "string" },
-        "operator": { "type": "string", "enum": [">", ">=", "<", "<=", "==", "!="] },
-        "value": { "type": "number" },
-        "reference": { "type": "string" },
-        "multiplier": { "type": "number" },
-        "min": { "type": "number" },
-        "max": { "type": "number" },
-        "inclusive": { "type": "boolean", "default": true },
-        "indicator": { "type": "string" },
-        "signal": { "type": "string" },
-        "pattern": { "type": "string" },
-        "direction": { "type": "string", "enum": ["above", "below"] },
-        "lookback": { "type": "integer", "minimum": 1 },
-        "confirmation_bars": { "type": "integer", "minimum": 0 }
+        "category": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "source": { "type": "string" },
+        "approximation": { "type": "boolean" },
+        "approximation_note": { "type": "string" }
       }
     }
   }

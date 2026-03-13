@@ -5,88 +5,123 @@
 Create a file called `my-strategy.aqml`:
 
 ```yaml
-aqml: "1.0"
+version: "2.0"
 
 name: My First Strategy
 description: "Simple RSI oversold screen"
+signal_type: buy
 
-universe:
-  market: A-shares
-  exclude: [ST]
+filters:
+  exclude_st: true
 
 rules:
-  - type: compare
-    field: rsi14
-    operator: "<"
-    value: 30
+  - type: range
+    indicator: rsi14
+    min: 0
+    max: 30
+    comment: "RSI in oversold zone"
 ```
 
-That's it. This strategy screens for all A-share stocks with RSI(14) below 30.
+That is enough to screen for A-share stocks with RSI(14) below 30.
 
 ## Adding More Conditions
 
 ```yaml
 rules:
-  # RSI oversold
-  - type: compare
-    field: rsi14
-    operator: "<"
-    value: 30
+  - type: range
+    indicator: rsi14
+    min: 0
+    max: 30
+    comment: "RSI oversold"
 
-  # MACD golden cross in last 3 days
-  - type: signal
-    indicator: macd
-    signal: golden_cross
-    lookback: 3
+  - logic: or
+    comment: "MACD golden cross within 3 bars"
+    conditions:
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: 0
+        comment: "MACD golden cross today"
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: -1
+        comment: "MACD golden cross yesterday"
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: -2
+        comment: "MACD golden cross 2 bars ago"
 
-  # Volume above average
   - type: compare
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma10
-    multiplier: 1.2
+    right: volume_ma10
+    right_multiplier: 1.2
+    comment: "Volume above average"
 ```
 
-All rules must be satisfied (implicit AND) for a stock to pass.
+Top-level `rules` are implicitly combined with `AND`. Use nested `logic` groups when you need `OR` or `NOT`.
 
 ## Using Scoring Mode
 
-Want to rank stocks instead of binary pass/fail? Add `scoring` and `weight` to rules:
+Add `scoring.rule_points` to rank candidates instead of requiring every rule to pass:
 
 ```yaml
 rules:
-  - type: compare
-    field: rsi14
-    operator: "<"
-    value: 30
-    weight: 50
+  - type: range
+    indicator: rsi14
+    min: 0
+    max: 30
+    comment: "RSI oversold"
 
   - type: signal
     indicator: macd
     signal: golden_cross
-    weight: 50
+    offset: 0
+    comment: "MACD golden cross today"
 
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
+  rule_points:
+    - points: 50
+    - points: 50
+```
+
+You can also add tiered fallback scoring:
+
+```yaml
+scoring:
+  max_score: 100
+  min_score: 60
+  rule_points:
+    - points: 60
+      tiers:
+        - condition: {indicator: rsi14, min: 30, max: 40}
+          points: 30
+    - points: 40
 ```
 
 ## Adding Exit Rules
 
 ```yaml
 exit_rules:
-  stop_loss: 0.05        # Cut losses at -5%
-  take_profit: 0.15      # Take profits at +15%
-  max_holding_days: 20   # Auto-exit after 20 days
+  stop_loss_pct: 5.0
+  take_profit_pct: 15.0
+  trailing_stop_pct: 8.0
+  max_holding_days: 20
 ```
+
+All exit percentages use whole-number percentages, not decimals.
 
 ## Portfolio Configuration
 
 ```yaml
 portfolio:
-  method: equal_weight    # Split equally across picks
-  max_positions: 10       # Hold max 10 stocks
-  max_sector_pct: 0.30    # No sector > 30%
+  method: equal_weight
+  max_positions: 10
+  initial_capital: 1000000
 ```
 
 ## Validation
@@ -94,7 +129,6 @@ portfolio:
 Validate your strategy against the JSON Schema:
 
 ```bash
-# Python (with jsonschema)
 python -c "
 import json, yaml, jsonschema
 schema = json.load(open('spec/schema.json'))
@@ -104,8 +138,21 @@ print('✓ Valid AQML')
 "
 ```
 
+If you have AurumQ locally, also run the executable validator:
+
+```bash
+.venv/bin/python - <<'PY'
+from pathlib import Path
+from aurumq.strategies.service import StrategyService
+
+aqml = Path('my-strategy.aqml').read_text(encoding='utf-8')
+StrategyService.validate_aqml(aqml)
+print('✓ Valid against AurumQ executable profile')
+PY
+```
+
 ## Next Steps
 
-- Browse [examples/](../examples/) for complete strategies
-- Read the [full specification](../spec/aqml-v1.0.md)
-- Try the [AurumQ platform](https://aurumq.ai) for live execution
+- Browse [examples/](../examples/) for complete v2 strategies
+- Read the [full specification](../spec/aqml-v2.0.md)
+- Try the [AurumQ platform](https://aurumq.ai) for backtesting and execution

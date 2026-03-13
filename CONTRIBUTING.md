@@ -7,10 +7,10 @@ Thank you for your interest in contributing to AQML (Aurum Quant Markup Language
 ### 📝 Strategy Examples
 Submit new strategy examples in `examples/`. Each file should:
 - Use `.aqml` extension
-- Include `aqml: "1.0"` version field
+- Include `version: "2.0"` and `signal_type`
 - Have clear `name` and `description`
-- Include comments explaining the strategy logic
-- Pass JSON Schema validation
+- Include `comment` on each top-level rule item
+- Pass JSON Schema validation and AurumQ executable-profile validation
 
 ### 🐛 Spec Issues
 Found an ambiguity or inconsistency in the specification? Open an issue with:

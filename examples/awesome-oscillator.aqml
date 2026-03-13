@@ -4,8 +4,7 @@
 # Source: je-suis-tm/quant-trading (Apache 2.0)
 # ================================================================
 
-aqml: "1.0"
-
+version: "2.0"
 name: Awesome Oscillator Momentum
 description: >
   The Awesome Oscillator measures market momentum by comparing the
@@ -14,56 +13,47 @@ description: >
   This AQML adaptation uses standard MA crossover signals on close price
   combined with volume confirmation as a proxy for AO momentum.
   原始策略对比短期(5)和长期(34)均线的差值来判断动量方向。
-version: "1.0.0"
-
+signal_type: buy
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [momentum, oscillator, ma-crossover, volume]
-  category: momentum
   source: "je-suis-tm/quant-trading/Awesome Oscillator backtest.py"
   source_license: "Apache-2.0"
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR]
-
 rules:
-  # Short MA above long MA — bullish momentum
   - type: compare
-    name: Short MA Above Long MA
-    field: ma5
+    left: ma5
     operator: ">"
-    reference: ma20
-    weight: 40
-
-  # MACD histogram positive — momentum confirmation
+    right: ma20
+    comment: Short MA Above Long MA
   - type: compare
-    name: MACD Histogram Positive
-    field: macd_hist
+    left: macd_hist
     operator: ">"
-    value: 0
-    weight: 30
-
-  # Volume above average — participation confirmation
+    right: 0
+    comment: MACD Histogram Positive
   - type: compare
-    name: Volume Confirmation
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma10
-    multiplier: 1.2
-    weight: 30
-
+    right: volume_ma10
+    right_multiplier: 1.2
+    comment: Volume Confirmation
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 40
+    - points: 30
+    - points: 30
 exit_rules:
-  stop_loss: 0.06
-  take_profit: 0.15
-  trailing_stop: 0.08
+  stop_loss_pct: 6.0
+  take_profit_pct: 15.0
+  trailing_stop_pct: 8.0
   max_holding_days: 20
-
 portfolio:
   method: equal_weight
   max_positions: 10

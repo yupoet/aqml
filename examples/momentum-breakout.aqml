@@ -3,15 +3,13 @@
 # 动量突破策略 — RSI 超卖反弹 + MACD 金叉 + 成交量确认
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Momentum Breakout Strategy
 description: >
   Screens for stocks showing oversold RSI bouncing with MACD confirmation
   and above-average volume. A classic momentum reversal setup targeting
   short-term rebounds in oversold conditions.
-version: "1.0.0"
-
+signal_type: buy
 metadata:
   author: Paris Yu
   created_at: "2026-03-01"
@@ -21,48 +19,53 @@ metadata:
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-
 rules:
-  # RSI14 in oversold territory
   - type: compare
-    name: RSI Oversold
-    field: rsi14
+    left: rsi14
     operator: "<"
-    value: 30
-    weight: 40
-
-  # MACD golden cross (DIF crosses above DEA)
-  - type: signal
-    name: MACD Golden Cross
-    indicator: macd
-    signal: golden_cross
-    lookback: 3
-    weight: 35
-
-  # Volume spike — today's volume > 1.5x 10-day average
+    right: 30
+    comment: RSI Oversold
+  - logic: or
+    comment: MACD Golden Cross
+    conditions:
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: 0
+        comment: MACD Golden Cross
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: -1
+        comment: MACD Golden Cross
+      - type: signal
+        indicator: macd
+        signal: golden_cross
+        offset: -2
+        comment: MACD Golden Cross
   - type: compare
-    name: Volume Confirmation
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma10
-    multiplier: 1.5
-    weight: 25
-
+    right: volume_ma10
+    right_multiplier: 1.5
+    comment: Volume Confirmation
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 40
+    - points: 35
+    - points: 25
 exit_rules:
-  stop_loss: 0.05
-  take_profit: 0.15
-  trailing_stop: 0.08
+  stop_loss_pct: 5.0
+  take_profit_pct: 15.0
+  trailing_stop_pct: 8.0
   max_holding_days: 20
-
 portfolio:
   method: score_weighted
   max_positions: 10
   max_sector_pct: 0.30
 
 risk:
-  max_drawdown: 0.15
-  max_single_position: 0.10
+  max_drawdown: 15.0
+  max_single_position: 10.0

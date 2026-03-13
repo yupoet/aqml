@@ -4,72 +4,58 @@
 # Difficulty: ⭐⭐ Intermediate
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Dual Thrust Breakout
 description: >
   A range breakout strategy inspired by the classic Dual Thrust system.
   Enters when price breaks above the upper Bollinger Band with volume
   confirmation and ATR volatility expansion, signaling a potential
   trend initiation.
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 30.0
 metadata:
   author: AQML Examples
   created_at: "2026-03-01"
   tags: [breakout, trend, volatility]
-  category: breakout
   source: "Adapted from classic Dual Thrust"
 
+  category: breakout
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 3000000000
-
 rules:
-  # Price breaks above upper Bollinger Band
   - type: breakout
-    name: Bollinger Upper Breakout
-    field: close
-    reference: boll_upper
-    direction: above
-    confirmation_bars: 1
-    weight: 40
-
-  # Volume surge confirms breakout
+    price: close
+    level: boll_upper
+    direction: up
+    comment: Bollinger Upper Breakout
   - type: compare
-    name: Volume Surge
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma10
-    multiplier: 2.0
-    weight: 35
-
-  # RSI not yet overbought (room to run)
+    right: volume_ma10
+    right_multiplier: 2.0
+    comment: Volume Surge
   - type: range
-    name: RSI Has Room
-    field: rsi14
+    indicator: rsi14
     min: 45
     max: 75
-    weight: 25
-
+    comment: RSI Has Room
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 65
-
+  rule_points:
+    - points: 40
+    - points: 35
+    - points: 25
 exit_rules:
-  stop_loss: 0.06
-  trailing_stop: 0.10
+  stop_loss_pct: 6.0
+  trailing_stop_pct: 10.0
   max_holding_days: 15
-
 portfolio:
   method: equal_weight
   max_positions: 8
 
 risk:
-  max_drawdown: 0.12
-  max_single_position: 0.12
+  max_drawdown: 12.0
+  max_single_position: 12.0

@@ -20,10 +20,10 @@
       <option name="HAS_PARENS" value="false" />
       <option name="HAS_STRING_ESCAPES" value="true" />
     </options>
-    <keywords keywords="aqml;name;description;version;metadata;universe;rules;scoring;exit_rules;portfolio;risk" ignore_case="false" />
-    <keywords2 keywords="type;field;operator;value;reference;multiplier;min;max;inclusive;indicator;signal;pattern;direction;lookback;confirmation_bars;weight;enabled;mode;min_score;method;max_positions;max_sector_pct;rebalance;stop_loss;take_profit;trailing_stop;max_holding_days;max_drawdown;max_single_position;max_sector_concentration;var_limit;correlation_threshold;market;exclude;filters;author;created_at;tags;category;source" ignore_case="false" />
-    <keywords3 keywords="compare;range;signal;pattern;breakout;golden_cross;death_cross;zero_cross_up;zero_cross_down;overbought;oversold;long_arrangement;short_arrangement;squeeze;expansion;upper_touch;lower_touch;hammer;engulfing_bull;engulfing_bear;doji;morning_star;evening_star;three_white_soldiers;three_black_crows" ignore_case="false" />
-    <keywords4 keywords="weighted;equal;threshold;equal_weight;score_weighted;market_cap_weighted;kelly;risk_parity;daily;weekly;biweekly;monthly;A-shares;A-shares-main;custom;ST;STAR;BSE;ChiNext;new_listing;above;below;true;false" ignore_case="false" />
+    <keywords keywords="name;description;version;signal_type;filters;metadata;universe;rules;scoring;exit_rules;portfolio;risk" ignore_case="false" />
+    <keywords2 keywords="type;logic;conditions;left;right;left_offset;right_offset;left_multiplier;right_multiplier;price;level;indicators;operator;min_above_pct;max_above_pct;min;max;indicator;signal;pattern;direction;offset;comment;required;max_score;min_score;rule_points;points;tiers;condition;volume_bonus;method;max_positions;max_sector_pct;initial_capital;rebalance;stop_loss_pct;take_profit_pct;trailing_stop_pct;max_holding_days;max_drawdown;max_single_position;market;exclude;include_boards;exclude_st;exclude_kcb;exclude_cyb;exclude_bj;exclude_limit_up;exclude_limit_down;min_amount;min_market_cap;include_industries;author;created_at;tags;category;difficulty;source;approximation;approximation_note" ignore_case="false" />
+    <keywords3 keywords="compare;compare_all;range;signal;pattern;breakout;and;or;not;golden_cross;death_cross;zero_cross_up;zero_cross_down;overbought;oversold;long_arrangement;short_arrangement;squeeze;expansion;upper_touch;lower_touch;hammer;engulfing_bull;engulfing_bear;doji;morning_star;evening_star;three_white_soldiers;three_black_crows" ignore_case="false" />
+    <keywords4 keywords="equal_weight;score_weighted;daily;weekly;biweekly;monthly;A-shares;A-shares-main;custom;ST;STAR;BSE;ChiNext;new_listing;buy;sell;up;down;true;false" ignore_case="false" />
   </highlighting>
   <extensionMap>
     <mapping ext="aqml" />

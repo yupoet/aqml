@@ -12,8 +12,7 @@
 #    This version approximates with multi-MA trend confirmation.
 # ══════════════════════════════════════════════════════════════
 
-aqml: "1.0"
-
+version: "2.0"
 name: Momentum Factor Ranking
 description: >
   ⚠️ Approximation of the momentum factor construction model from
@@ -23,13 +22,13 @@ description: >
   This version uses multi-timeframe MA alignment as a momentum proxy.
   ⚠️ 开源证券动量因子构建模型的近似版本。原策略使用 FF3 三因子模型分解
   收益率提取特质动量；本版本使用多周期均线排列确认动量方向。
-version: "1.0.0"
-
+signal_type: buy
+filters:
+  min_market_cap: 30.0
 metadata:
   author: AQML Community
   created_at: "2026-03-01"
   tags: [momentum, factor, multi-timeframe, approximation]
-  category: momentum
   source: "https://github.com/hugo2046/QuantsPlaybook/tree/master/B-因子构建类/A股市场中如何构造动量因子？"
   original_file: "notebook/A股市场中如何构造动量因子.ipynb"
   reference_paper: "《20200721-开源证券-开源量化评论（3）：A股市场中如何构造动量因子？》"
@@ -41,66 +40,43 @@ metadata:
     The original uses FF3 residual momentum percentile ranking.
     This version approximates with multi-MA trend alignment.
 
+  category: momentum
 universe:
   market: A-shares
   exclude: [ST, STAR, BSE]
-  filters:
-    - type: compare
-      field: total_mv
-      operator: ">"
-      value: 3000000000
-
 rules:
-  # Price above MA60 — medium-term uptrend
   - type: compare
-    name: Above MA60
-    field: close
+    left: close
     operator: ">"
-    reference: ma60
-    weight: 30
-    # APPROX: 原策略使用 FF3 残差动量排名前20%
-    # Original uses top quintile of FF3 residual momentum
-    # MA60 crossover serves as medium-term momentum proxy
-
-  # Price above MA120 — long-term uptrend confirmation
+    right: ma60
+    comment: Above MA60
   - type: compare
-    name: Above MA120
-    field: close
+    left: close
     operator: ">"
-    reference: ma120
-    weight: 25
-    # APPROX: 原策略使用多月动量累积
-    # Original accumulates multi-month momentum
-    # MA120 captures half-year trend direction
-
-  # RSI above 50 — positive momentum regime
+    right: ma120
+    comment: Above MA120
   - type: compare
-    name: RSI Positive Momentum
-    field: rsi14
+    left: rsi14
     operator: ">"
-    value: 50
-    weight: 25
-    # APPROX: 原策略使用动量排名百分位
-    # Original ranks momentum percentile
-    # RSI > 50 confirms short-term positive momentum
-
-  # Volume above average — momentum participation
+    right: 50
+    comment: RSI Positive Momentum
   - type: compare
-    name: Volume Confirmation
-    field: volume
+    left: volume
     operator: ">"
-    reference: volume_ma20
-    weight: 20
-
+    right: volume_ma20
+    comment: Volume Confirmation
 scoring:
-  mode: weighted
+  max_score: 100
   min_score: 60
-
+  rule_points:
+    - points: 30
+    - points: 25
+    - points: 25
+    - points: 20
 exit_rules:
-  stop_loss: 0.08
-  trailing_stop: 0.10
+  stop_loss_pct: 8.0
+  trailing_stop_pct: 10.0
   max_holding_days: 30
-
 portfolio:
   method: score_weighted
   max_positions: 20

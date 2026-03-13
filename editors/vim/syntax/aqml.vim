@@ -13,24 +13,24 @@ runtime! syntax/yaml.vim
 unlet! b:current_syntax
 
 " ── AQML Sections ──────────────────────────────────────────
-syn keyword aqmlSection aqml name description version metadata universe rules scoring exit_rules portfolio risk
+syn keyword aqmlSection name description version signal_type filters metadata universe rules scoring exit_rules portfolio risk
 hi def link aqmlSection Keyword
 
 " ── Rule Types ─────────────────────────────────────────────
-syn keyword aqmlRuleType compare range signal pattern breakout
+syn keyword aqmlRuleType compare compare_all range signal pattern breakout and or not
 hi def link aqmlRuleType Type
 
 " ── Indicators ─────────────────────────────────────────────
-syn keyword aqmlIndicator ma5 ma10 ma20 ma60 ma120 ma250
-syn keyword aqmlIndicator ema5 ema10 ema20 ema60
-syn keyword aqmlIndicator macd macd_dif macd_dea macd_hist
-syn keyword aqmlIndicator rsi6 rsi14
+syn keyword aqmlIndicator ma5 ma10 ma20 ma30 ma60 ma90 ma120 ma125 ma250 ma375 ma500
+syn keyword aqmlIndicator ema5 ema10 ema20 ema30 ema60
+syn keyword aqmlIndicator macd macd_dif macd_dea macd_signal macd_hist
+syn keyword aqmlIndicator rsi6 rsi12 rsi14 rsi24
 syn keyword aqmlIndicator kdj_k kdj_d kdj_j
-syn keyword aqmlIndicator boll_upper boll_mid boll_lower
-syn keyword aqmlIndicator atr14 cci14 obv dmi_plus dmi_minus dmi_adx
-syn keyword aqmlIndicator sar supertrend mfi14 wr14
-syn keyword aqmlIndicator volume_ma5 volume_ma10 volume_ma20
-syn keyword aqmlIndicator close open high low volume pe_ttm pb roe total_mv
+syn keyword aqmlIndicator boll_upper boll_mid boll_middle boll_lower
+syn keyword aqmlIndicator atr atr14 atr_percent cci cci14 obv obv_change dmi_plus dmi_minus dmi_pdi dmi_mdi dmi_adx
+syn keyword aqmlIndicator sar supertrend supertrend_direction mfi mfi14 wr wr14
+syn keyword aqmlIndicator vol_ma5 vol_ma10 vol_ma20 volume_ma5 volume_ma10 volume_ma20 volume_ratio volume_amplify
+syn keyword aqmlIndicator close open high low volume amount pe_ttm pe pb ps roe eps total_mv market_cap turnover turnover_rate fi_roe np_yoy revenue_growth
 hi def link aqmlIndicator Identifier
 
 " ── Signals ────────────────────────────────────────────────
@@ -45,10 +45,9 @@ syn keyword aqmlPattern morning_star evening_star three_white_soldiers three_bla
 hi def link aqmlPattern Constant
 
 " ── Enums ──────────────────────────────────────────────────
-syn keyword aqmlEnum weighted equal threshold
-syn keyword aqmlEnum equal_weight score_weighted market_cap_weighted kelly risk_parity
+syn keyword aqmlEnum equal_weight score_weighted
 syn keyword aqmlEnum daily weekly biweekly monthly
-syn keyword aqmlEnum above below
+syn keyword aqmlEnum buy sell up down
 hi def link aqmlEnum PreProc
 
 " ── Universe Labels ────────────────────────────────────────
